@@ -244,13 +244,15 @@ ekspozycji. Nie trafia tam obraz prawdziwej infrastruktury.
 
 ## Open Questions
 
-1. Jakie wagi otrzymują poszczególne poziomy ekspozycji i krytyczności w wyliczeniu
-   priorytetu? — do rozstrzygnięcia na etapie implementacji, wraz z zestawem przypadków
-   testowych. Wiążące ograniczenie pochodzi z guardrails: dobrana waga musi gwarantować,
-   że ta sama podatność na zasobie osiągalnym z sieci publicznej nigdy nie znajdzie się
-   w kolejce niżej niż na zasobie odciętym. Blokuje: nie.
+Brak otwartych pytań blokujących.
 
 ### Rozstrzygnięte 2026-08-20
+
+- Wagi w wyliczeniu priorytetu: ekspozycja 1,0 / 0,6 / 0,3 oraz krytyczność 1,0 / 0,75
+  / 0,5, wynik jako iloczyn z oceną CVSS. Progi klas: 7,0 / 4,5 / 2,0. Obie skale są
+  ściśle malejące, co czyni guardrail o zasobie wystawionym własnością konstrukcyjną
+  reguły, a nie założeniem — sprawdzaną wyczerpująco przez testy na pełnej siatce
+  kombinacji. Rozstrzygnięte w zmianie `priority-visible`.
 
 - Poziomy ekspozycji: osiągalny z sieci publicznej, osiągalny wyłącznie z sieci
   wewnętrznej, odcięty. Trzy poziomy.

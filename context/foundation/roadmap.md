@@ -45,7 +45,7 @@ głównej tezy produktu; wszystko dalsze ma znaczenie tylko wtedy, gdy ten momen
 | F-03 | verification-pipeline | (fundament) każda zmiana przechodzi lint, typy i testy automatycznie | F-01, S-01 | NFR-01, NFR-05 | proposed |
 | S-01 | first-sign-in | założyć konto, zalogować się i zobaczyć pustą kolejkę z wyjaśnieniem | F-01, F-02 | US-01, FR-001, FR-002 | proposed |
 | S-02 | asset-registry | zarejestrować zasób z ekspozycją i krytycznością oraz zobaczyć go na liście | S-01 | FR-003, FR-004 | proposed |
-| S-03 | priority-visible | dopisać podatność i zobaczyć priorytet, jego składniki oraz termin | S-02 | US-01, FR-007, FR-010, FR-011 | proposed |
+| S-03 | priority-visible | dopisać podatność i zobaczyć priorytet, jego składniki oraz termin | S-02 | US-01, FR-007, FR-010, FR-011 | in-progress |
 | S-04 | ordered-queue | zobaczyć kolejkę uporządkowaną priorytetem, z oznaczeniem pozycji po terminie | S-03 | US-01, FR-012, NFR-01 | proposed |
 | S-05 | decision-trail | zamknąć pozycję jako załataną albo odrzuconą z powodem i wrócić do uzasadnienia | S-04 | US-01, FR-013, FR-014, FR-015 | proposed |
 | S-06 | reopen-decision | przywrócić zamkniętą pozycję do kolejki bez utraty poprzedniego rozstrzygnięcia | S-05 | US-04, FR-016 | proposed |
@@ -154,8 +154,7 @@ Stan repozytorium na 2026-08-20.
 - **Prerequisites:** S-02
 - **Parallel with:** —
 - **Blockers:** —
-- **Unknowns:**
-  - Jakie wagi otrzymują poziomy ekspozycji i krytyczności? — Owner: zespół. Block: nie; rozstrzygane tabelą przypadków testowych, ograniczone guardrailem o zasobie wystawionym.
+- **Unknowns:** — (wagi rozstrzygnięte 2026-08-20 w zmianie `priority-visible`; reguła i jej testy gotowe przed resztą przekroju)
 - **Risk:** Serce produktu. Reguła musi powstać jako czysta funkcja pokryta testami, zanim dotknie interfejsu — inaczej jej weryfikacja przeniesie się do testów przeglądowych, gdzie jest wolna i krucha.
 - **Status:** proposed
 
@@ -251,8 +250,7 @@ Stan repozytorium na 2026-08-20.
 
 ## Open Roadmap Questions
 
-1. **Jakie wagi otrzymują poszczególne poziomy ekspozycji i krytyczności w wyliczeniu priorytetu?** — Owner: zespół. Block: S-03, rozstrzygane tabelą przypadków przy planie tej pozycji.
-2. **Który dostawca modelu spełnia kryterium pojedynczego klucza i rozliczenia za użycie?** — Owner: użytkownik. Block: S-09.
+1. **Który dostawca modelu spełnia kryterium pojedynczego klucza i rozliczenia za użycie?** — Owner: użytkownik. Block: S-09.
 
 ## Parked
 
