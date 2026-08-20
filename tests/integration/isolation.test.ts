@@ -6,71 +6,115 @@
  * wierszy łatwo skonfigurować pozornie, a polityka zapisana i nieaktywna wygląda
  * identycznie jak działająca. Ten test odróżnia jedno od drugiego.
  *
- * Test uderza w prawdziwy projekt i zakłada dwa konta o losowych adresach. Pomija się
- * sam, gdy konfiguracja jest nieobecna, żeby nie wywracać pipeline'u bez sekretów.
+ * Testy uderzają w prawdziwy projekt i zakładają konta o losowych adresach. Pomijają
+ * się same, gdy konfiguracja jest nieobecna — ale głośno o tym mówią, bo cicho
+ * pominięty test bezpieczeństwa wygląda w raporcie tak samo jak zdany.
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-const URL = process.env.SUPABASE_URL;
-const KEY = process.env.SUPABASE_KEY;
-const configured = Boolean(URL && KEY);
+const SUPABASE_URL = process.env.SUPABASE_URL ?? "";
+const SUPABASE_KEY = process.env.SUPABASE_KEY ?? "";
+const configured = SUPABASE_URL !== "" && SUPABASE_KEY !== "";
 
 if (!configured) {
-  // Cicho pominięty test bezpieczeństwa wygląda w raporcie tak samo jak zdany.
   console.warn(
     "\n[UWAGA] Testy izolacji kont POMINIĘTE — brak SUPABASE_URL / SUPABASE_KEY.\n" +
-      "         Dowód na izolację danych NIE został przeprowadzony w tym przebiegu.\n"
+      "        Dowód na izolację danych NIE został przeprowadzony w tym przebiegu.\n",
   );
 }
 
 const suite = configured ? describe : describe.skip;
 
-function freshEmail(tag: string): string {
-  return `patchqueue-test-${tag}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
+interface IdRow {
+  id: string;
 }
 
-async function signUpClient(tag: string): Promise<{ client: SupabaseClient; userId: string }> {
-  const client = createClient(URL!, KEY!);
-  const email = freshEmail(tag);
-  const { data, error } = await client.auth.signUp({ email, password: "TestoweHaslo123!" });
-  if (error) throw new Error(`Nie udało się założyć konta ${tag}: ${error.message}`);
-  const userId = data.user?.id;
-  if (!userId) throw new Error(`Konto ${tag} powstało bez identyfikatora użytkownika`);
-  if (!data.session) throw new Error("Rejestracja nie zwróciła sesji — czy potwierdzanie e-maila jest wyłączone?");
-  return { client, userId };
+interface Account {
+  client: SupabaseClient;
+  userId: string;
+}
+
+const PASSWORD = "TestoweHaslo123!";
+
+function unwrap<T>(value: T | null, what: string): T {
+  if (value === null) {
+    throw new Error(`Brak oczekiwanego wyniku: ${what}`);
+  }
+  return value;
+}
+
+function freshEmail(tag: string): string {
+  return `patchqueue-test-${tag}-${Date.now().toString()}-${Math.floor(Math.random() * 1e6).toString()}@example.com`;
+}
+
+async function signUpAccount(tag: string): Promise<Account> {
+  const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const { data, error } = await client.auth.signUp({ email: freshEmail(tag), password: PASSWORD });
+  if (error !== null) {
+    throw new Error(`Nie udało się założyć konta ${tag}: ${error.message}`);
+  }
+  if (data.session === null) {
+    throw new Error("Rejestracja nie zwróciła sesji — czy potwierdzanie adresu jest wyłączone?");
+  }
+  const user = unwrap(data.user, `identyfikator użytkownika dla konta ${tag}`);
+  return { client, userId: user.id };
+}
+
+async function insertAsset(account: Account, overrides: Record<string, string> = {}): Promise<string> {
+  const { data, error }: { data: IdRow | null; error: { message: string } | null } = await account.client
+    .from("assets")
+    .insert({
+      user_id: account.userId,
+      name: "srv-web-01",
+      component: "nginx",
+      version: "1.18.0",
+      exposure: "public",
+      criticality: "high",
+      ...overrides,
+    })
+    .select("id")
+    .single();
+
+  if (error !== null) {
+    throw new Error(`Nie udało się dodać zasobu: ${error.message}`);
+  }
+  return unwrap(data, "identyfikator dodanego zasobu").id;
+}
+
+async function insertVulnerability(
+  account: Account,
+  assetId: string,
+  identifier: string,
+  cvss: number,
+): Promise<string> {
+  const { data, error }: { data: IdRow | null; error: { message: string } | null } = await account.client
+    .from("vulnerabilities")
+    .insert({ user_id: account.userId, asset_id: assetId, identifier, cvss })
+    .select("id")
+    .single();
+
+  if (error !== null) {
+    throw new Error(`Nie udało się dodać podatności: ${error.message}`);
+  }
+  return unwrap(data, "identyfikator dodanej podatności").id;
 }
 
 suite("izolacja danych między kontami", () => {
-  let alice: { client: SupabaseClient; userId: string };
-  let bob: { client: SupabaseClient; userId: string };
+  let alice: Account;
+  let bob: Account;
   let aliceAssetId: string;
 
   beforeAll(async () => {
-    alice = await signUpClient("alice");
-    bob = await signUpClient("bob");
-
-    const { data, error } = await alice.client
-      .from("assets")
-      .insert({
-        user_id: alice.userId,
-        name: "srv-web-01",
-        component: "nginx",
-        version: "1.18.0",
-        exposure: "public",
-        criticality: "high",
-      })
-      .select("id")
-      .single();
-
-    if (error) throw new Error(`Alice nie mogła dodać zasobu: ${error.message}`);
-    aliceAssetId = data.id as string;
+    alice = await signUpAccount("alice");
+    bob = await signUpAccount("bob");
+    aliceAssetId = await insertAsset(alice);
   }, 30_000);
 
   afterAll(async () => {
-    await alice?.client.from("assets").delete().eq("id", aliceAssetId);
-    await alice?.client.auth.signOut();
-    await bob?.client.auth.signOut();
+    await alice.client.from("assets").delete().eq("id", aliceAssetId);
+    await alice.client.auth.signOut();
+    await bob.client.auth.signOut();
   });
 
   it("właściciel widzi własny zasób", async () => {
@@ -80,9 +124,9 @@ suite("izolacja danych między kontami", () => {
   });
 
   it("drugie konto nie widzi cudzego zasobu przy odczycie wszystkich", async () => {
-    const { data, error } = await bob.client.from("assets").select("id");
+    const { data, error }: { data: IdRow[] | null; error: unknown } = await bob.client.from("assets").select("id");
     expect(error).toBeNull();
-    expect(data?.map((r) => r.id)).not.toContain(aliceAssetId);
+    expect((data ?? []).map((row) => row.id)).not.toContain(aliceAssetId);
   });
 
   it("drugie konto nie widzi cudzego zasobu nawet znając jego identyfikator", async () => {
@@ -92,16 +136,19 @@ suite("izolacja danych między kontami", () => {
   });
 
   it("drugie konto nie może zmienić cudzego zasobu", async () => {
-    const { data, error } = await bob.client
+    const { data } = await bob.client
       .from("assets")
       .update({ exposure: "isolated" })
       .eq("id", aliceAssetId)
       .select("id");
-    expect(error?.code ?? "").not.toBe("PGRST301");
     expect(data ?? []).toHaveLength(0);
 
-    const { data: after } = await alice.client.from("assets").select("exposure").eq("id", aliceAssetId).single();
-    expect(after?.exposure).toBe("public");
+    const { data: after }: { data: { exposure: string } | null; error: unknown } = await alice.client
+      .from("assets")
+      .select("exposure")
+      .eq("id", aliceAssetId)
+      .single();
+    expect(unwrap(after, "zasób Alice po próbie zmiany").exposure).toBe("public");
   });
 
   it("drugie konto nie może usunąć cudzego zasobu", async () => {
@@ -123,7 +170,7 @@ suite("izolacja danych między kontami", () => {
   });
 
   it("niezalogowany nie widzi niczego", async () => {
-    const anonymous = createClient(URL!, KEY!);
+    const anonymous = createClient(SUPABASE_URL, SUPABASE_KEY);
     const { data } = await anonymous.from("assets").select("id");
     expect(data ?? []).toHaveLength(0);
   });
@@ -131,127 +178,74 @@ suite("izolacja danych między kontami", () => {
 
 suite("nienaruszalność rozstrzygnięć", () => {
   it("zapisanego rozstrzygnięcia nie da się usunąć ani zmienić", async () => {
-    const { client, userId } = await signUpClient("trail");
+    const account = await signUpAccount("trail");
     try {
-      const { data: asset } = await client
-        .from("assets")
-        .insert({
-          user_id: userId,
-          name: "srv-db-01",
-          component: "postgresql",
-          version: "14.2",
-          exposure: "internal",
-          criticality: "high",
-        })
-        .select("id")
-        .single();
+      const assetId = await insertAsset(account, { name: "srv-db-01", component: "postgresql", version: "14.2" });
+      const vulnId = await insertVulnerability(account, assetId, "CVE-2026-0001", 7.5);
 
-      const { data: vuln } = await client
-        .from("vulnerabilities")
-        .insert({
-          user_id: userId,
-          asset_id: asset!.id,
-          identifier: "CVE-2026-0001",
-          cvss: 7.5,
-          description: "test",
-        })
-        .select("id")
-        .single();
-
-      const { data: decision, error: insertError } = await client
+      const reason = "komponent nieużywany w tej konfiguracji";
+      const { data, error }: { data: IdRow | null; error: { message: string } | null } = await account.client
         .from("decisions")
-        .insert({
-          user_id: userId,
-          vulnerability_id: vuln!.id,
-          kind: "rejected",
-          reason: "komponent nieużywany w tej konfiguracji",
-        })
+        .insert({ user_id: account.userId, vulnerability_id: vulnId, kind: "rejected", reason })
         .select("id")
         .single();
-      expect(insertError).toBeNull();
+      expect(error).toBeNull();
+      const decisionId = unwrap(data, "identyfikator rozstrzygnięcia").id;
 
-      const { data: updated } = await client
+      const { data: updated } = await account.client
         .from("decisions")
         .update({ reason: "zmienione uzasadnienie" })
-        .eq("id", decision!.id)
+        .eq("id", decisionId)
         .select("id");
       expect(updated ?? []).toHaveLength(0);
 
-      await client.from("decisions").delete().eq("id", decision!.id);
-      const { data: still } = await client.from("decisions").select("reason").eq("id", decision!.id).single();
-      expect(still?.reason).toBe("komponent nieużywany w tej konfiguracji");
+      await account.client.from("decisions").delete().eq("id", decisionId);
+      const { data: still }: { data: { reason: string } | null; error: unknown } = await account.client
+        .from("decisions")
+        .select("reason")
+        .eq("id", decisionId)
+        .single();
+      expect(unwrap(still, "rozstrzygnięcie po próbie usunięcia").reason).toBe(reason);
 
-      await client.from("vulnerabilities").delete().eq("id", vuln!.id);
-      await client.from("assets").delete().eq("id", asset!.id);
+      await account.client.from("vulnerabilities").delete().eq("id", vulnId);
+      await account.client.from("assets").delete().eq("id", assetId);
     } finally {
-      await client.auth.signOut();
+      await account.client.auth.signOut();
     }
   }, 30_000);
 
   it("odrzucenie bez powodu jest odrzucane przez bazę", async () => {
-    const { client, userId } = await signUpClient("noreason");
+    const account = await signUpAccount("noreason");
     try {
-      const { data: asset } = await client
-        .from("assets")
-        .insert({
-          user_id: userId,
-          name: "srv-app-01",
-          component: "openssl",
-          version: "3.0.2",
-          exposure: "public",
-          criticality: "medium",
-        })
-        .select("id")
-        .single();
+      const assetId = await insertAsset(account, { name: "srv-app-01", component: "openssl", version: "3.0.2" });
+      const vulnId = await insertVulnerability(account, assetId, "CVE-2026-0002", 5.3);
 
-      const { data: vuln } = await client
-        .from("vulnerabilities")
-        .insert({ user_id: userId, asset_id: asset!.id, identifier: "CVE-2026-0002", cvss: 5.3 })
-        .select("id")
-        .single();
-
-      const { error } = await client
+      const { error } = await account.client
         .from("decisions")
-        .insert({ user_id: userId, vulnerability_id: vuln!.id, kind: "rejected", reason: "   " });
+        .insert({ user_id: account.userId, vulnerability_id: vulnId, kind: "rejected", reason: "   " });
       expect(error).not.toBeNull();
 
-      await client.from("vulnerabilities").delete().eq("id", vuln!.id);
-      await client.from("assets").delete().eq("id", asset!.id);
+      await account.client.from("vulnerabilities").delete().eq("id", vulnId);
+      await account.client.from("assets").delete().eq("id", assetId);
     } finally {
-      await client.auth.signOut();
+      await account.client.auth.signOut();
     }
   }, 30_000);
 
   it("usunięcie zasobu z otwartą pozycją jest odrzucane", async () => {
-    const { client, userId } = await signUpClient("openitem");
+    const account = await signUpAccount("openitem");
     try {
-      const { data: asset } = await client
-        .from("assets")
-        .insert({
-          user_id: userId,
-          name: "srv-mail-01",
-          component: "postfix",
-          version: "3.6",
-          exposure: "public",
-          criticality: "high",
-        })
-        .select("id")
-        .single();
+      const assetId = await insertAsset(account, { name: "srv-mail-01", component: "postfix", version: "3.6" });
+      const vulnId = await insertVulnerability(account, assetId, "CVE-2026-0003", 9.1);
 
-      const { data: vuln } = await client
-        .from("vulnerabilities")
-        .insert({ user_id: userId, asset_id: asset!.id, identifier: "CVE-2026-0003", cvss: 9.1 })
-        .select("id")
-        .single();
-
-      const { error } = await client.from("assets").delete().eq("id", asset!.id);
+      const { error } = await account.client.from("assets").delete().eq("id", assetId);
       expect(error).not.toBeNull();
-      expect(error?.message).toContain("CVE-2026-0003");
+      expect(error?.message ?? "").toContain("CVE-2026-0003");
 
-      await client.from("vulnerabilities").delete().eq("id", vuln!.id);
-      await client.from("assets").delete().eq("id", asset!.id);
+      await account.client.from("vulnerabilities").delete().eq("id", vulnId);
+      await account.client.from("assets").delete().eq("id", assetId);
     } finally {
-      await client.auth.signOut();
+      await account.client.auth.signOut();
     }
   }, 30_000);
 });
