@@ -1,6 +1,22 @@
-# Rules for AI
+# Rules for AI — PatchQueue
 
-This file provides guidance to AI Agent when working with code in this repository.
+Guidance for the agent working in this repository.
+
+## Project
+
+PatchQueue orders vulnerability remediation by combining a vulnerability's CVSS score
+with the exposure and criticality of the asset it sits on. Same vulnerability, different
+asset, different priority — that is the product, and it is what separates it from a
+spreadsheet sorted by CVSS.
+
+Read before planning any change:
+
+- `context/foundation/prd.md` — requirements (FR-001…FR-017), user stories, guardrails
+- `context/foundation/roadmap.md` — vertical slices, dependency order, current position
+- `context/foundation/tech-stack.md` — stack decision and accepted risks
+- `context/foundation/shape-notes.md` — why the product is shaped this way
+
+Per-change work lives in `context/changes/<change-id>/`. Use the roadmap's Change ID.
 
 ## Commands
 
@@ -10,6 +26,16 @@ This file provides guidance to AI Agent when working with code in this repositor
 - `npm run lint` — ESLint with type-checked rules
 - `npm run lint:fix` — auto-fix lint issues
 - `npm run format` — Prettier (includes prettier-plugin-astro + prettier-plugin-tailwindcss)
+- `npm run typecheck` — `astro check`
+- `npm test` — Vitest (unit; domain rules)
+- `npm run test:e2e` — Playwright (user-facing flows)
+
+Quality gates before declaring a change done: `lint`, `typecheck`, `test`, `build`.
+Run `npx astro sync` first after any dependency change — lint fails on missing virtual
+module types otherwise.
+
+The npm cache in `~/.npm` contains root-owned entries; pass
+`--cache <writable-dir>` if an install fails with EACCES.
 
 Pre-commit hooks: husky + lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` and `prettier --write` on `*.{json,css,md}`.
 
@@ -28,6 +54,20 @@ Full server-side rendering (`output: "server"` in astro.config.mjs). All pages a
 - API endpoints: `src/pages/api/auth/{signin,signup,signout}.ts`
 - Auth pages: `src/pages/auth/{signin,signup,confirm-email}.astro`
 - Protected page example: `src/pages/dashboard.astro`
+
+### Domain rules — do not violate
+
+- The priority rule lives in one module and is a pure function. It is never inlined into
+  a route handler or a component, and never computed in two places.
+- A vulnerability on an internet-facing asset must never rank below the same
+  vulnerability on an isolated asset. This invariant is covered by unit tests.
+- A recorded decision — patched, or rejected with a reason — is never deleted or
+  overwritten. Reopening an item appends to its history; it does not replace it.
+- Rejecting an item without a reason is impossible.
+- Deleting an asset that still has unresolved items is refused, and the refusal names
+  the blocking items. This is a domain rule, not form validation — it holds regardless
+  of which path the request arrives through.
+- Changing an asset's exposure recalculates every open item on it, and no resolved one.
 
 ### Key conventions
 
@@ -52,3 +92,11 @@ Full server-side rendering (`output: "server"` in astro.config.mjs). All pages a
 ## CI
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint + build on every push and PR to master. Requires `SUPABASE_URL` and `SUPABASE_KEY` repository secrets for the build step.
+
+Extending this pipeline with typecheck, unit tests, E2E and an agent review pass is
+tracked as F-03 `verification-pipeline` in the roadmap.
+
+## Known accepted risks
+
+See `context/changes/bootstrap-verification/verification.md` for the dependency audit
+and the reasoning behind each finding left unresolved.
