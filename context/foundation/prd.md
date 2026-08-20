@@ -185,14 +185,14 @@ właściciela, bez współdzielenia kolejki.
 
 ## Non-Functional Requirements
 
-- Wejście do kolejki i zmiana jej uporządkowania pozostają odczuwalnie natychmiastowe
-  przy stu pozycjach.
-- Każda operacja trwająca dłużej niż dwie sekundy przez cały swój czas informuje
+- NFR-01: Wejście do kolejki i zmiana jej uporządkowania pozostają odczuwalnie
+  natychmiastowe przy stu pozycjach.
+- NFR-02: Każda operacja trwająca dłużej niż dwie sekundy przez cały swój czas informuje
   użytkownika, że trwa, i daje się przerwać.
-- Całą podstawową ścieżkę da się przejść wyłącznie klawiaturą.
-- Niedostępność albo wyczerpanie limitu funkcji wytwarzającej streszczenia nie odbiera
-  dostępu do żadnej pozostałej funkcji produktu.
-- Zalogowany użytkownik nie ma dostępu do danych innego konta żadną ścieżką.
+- NFR-03: Całą podstawową ścieżkę da się przejść wyłącznie klawiaturą.
+- NFR-04: Niedostępność albo wyczerpanie limitu funkcji wytwarzającej streszczenia nie
+  odbiera dostępu do żadnej pozostałej funkcji produktu.
+- NFR-05: Zalogowany użytkownik nie ma dostępu do danych innego konta żadną ścieżką.
 
 ## Business Logic
 
