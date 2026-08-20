@@ -200,9 +200,13 @@ Produkt ustala kolejność łatania i termin działania, łącząc ocenę CVSS p
 ekspozycją i krytycznością zasobu, na którym ta podatność stoi.
 
 Regułę zasilają trzy rzeczy podawane przez użytkownika: ocena CVSS wprowadzona wraz z
-podatnością, poziom ekspozycji zasobu oraz jego krytyczność. Na wyjściu powstaje
-priorytet pozycji, wyznaczony na jego podstawie termin działania oraz miejsce w
-kolejce. Konsekwencją reguły jest to, że ta sama podatność otrzymuje różny priorytet w
+podatnością jako liczba od 0 do 10, poziom ekspozycji zasobu oraz jego krytyczność.
+Ekspozycja przyjmuje trzy wartości — osiągalny z sieci publicznej, osiągalny wyłącznie
+z sieci wewnętrznej, odcięty od świata zewnętrznego. Krytyczność przyjmuje trzy
+wartości: niska, średnia, wysoka. Na wyjściu powstaje priorytet pozycji w jednej z czterech klas — krytyczny, wysoki,
+średni, niski — wyznaczony na jego podstawie termin działania oraz miejsce w kolejce.
+Terminy wynoszą trzy dni dla klasy krytycznej, czternaście dla wysokiej i sześćdziesiąt
+dla średniej; klasa niska nie otrzymuje terminu. Konsekwencją reguły jest to, że ta sama podatność otrzymuje różny priorytet w
 zależności od tego, na którym zasobie się znajduje — i to odróżnia kolejkę od listy
 posortowanej po samej ocenie CVSS.
 
@@ -240,12 +244,18 @@ ekspozycji. Nie trafia tam obraz prawdziwej infrastruktury.
 
 ## Open Questions
 
-1. Jakie poziomy przyjmuje ekspozycja zasobu i jaka jest ich kolejność? — TBD po
-   stronie użytkownika. Blokuje: nie, ale bez tego reguła priorytetu nie da się
-   zaimplementować jednoznacznie.
-2. Jaką skalę przyjmuje krytyczność zasobu? — TBD po stronie użytkownika. Blokuje: nie,
-   jak wyżej.
-3. Jakie terminy odpowiadają poszczególnym poziomom priorytetu? — TBD po stronie
-   użytkownika. Blokuje: nie, ale FR-011 i FR-012 pozostają nieostre do rozstrzygnięcia.
-4. Czy ocena CVSS jest wprowadzana jako pojedyncza liczba, czy produkt przyjmuje także
-   pełny zapis wektora? — TBD. Blokuje: nie.
+1. Jakie wagi otrzymują poszczególne poziomy ekspozycji i krytyczności w wyliczeniu
+   priorytetu? — do rozstrzygnięcia na etapie implementacji, wraz z zestawem przypadków
+   testowych. Wiążące ograniczenie pochodzi z guardrails: dobrana waga musi gwarantować,
+   że ta sama podatność na zasobie osiągalnym z sieci publicznej nigdy nie znajdzie się
+   w kolejce niżej niż na zasobie odciętym. Blokuje: nie.
+
+### Rozstrzygnięte 2026-08-20
+
+- Poziomy ekspozycji: osiągalny z sieci publicznej, osiągalny wyłącznie z sieci
+  wewnętrznej, odcięty. Trzy poziomy.
+- Krytyczność zasobu: niska, średnia, wysoka. Trzy poziomy.
+- Terminy według klasy priorytetu: krytyczny trzy dni, wysoki czternaście, średni
+  sześćdziesiąt, niski bez terminu.
+- Ocena CVSS wprowadzana jako pojedyncza liczba od 0 do 10. Pełny zapis wektora
+  pozostaje poza zakresem pierwszej wersji.
