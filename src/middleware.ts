@@ -6,9 +6,11 @@ const PROTECTED_ROUTES = [
   "/queue",
   "/assets",
   "/items",
+  "/import",
   "/api/assets",
   "/api/vulnerabilities",
   "/api/decisions",
+  "/api/import",
 ];
 
 export const onRequest = defineMiddleware(async (context, next) => {

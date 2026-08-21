@@ -144,6 +144,80 @@ test.describe("formularze uwierzytelniania", () => {
   });
 });
 
+test.describe("wczytywanie z zewnętrznego źródła", () => {
+  test.skip(!configured, "brak konfiguracji Supabase");
+
+  test("raport skanera trafia do kolejki i dopasowuje się do zasobu po komponencie", async ({ page }) => {
+    await signUp(page);
+
+    await addAsset(page, {
+      name: "srv-import-01",
+      component: "nginx",
+      version: "1.18.0",
+      exposure: "public",
+      criticality: "high",
+    });
+
+    await page.goto("/import");
+    await page
+      .locator("#raw")
+      .fill(
+        ["CVE,Component,Version,CVSS,Description", "CVE-2026-7001,nginx,1.18.0,9.1,zdalne wykonanie kodu"].join("\n"),
+      );
+    await page.getByRole("button", { name: "Wczytaj" }).click();
+
+    // Format rozpoznany bez pytania użytkownika, jedna pozycja dodana.
+    const summary = page.getByTestId("import-summary");
+    await expect(summary).toContainText("raport skanera (CSV)");
+    await expect(summary).toContainText("Dodano 1");
+
+    await page.goto("/queue");
+    await expect(page.getByRole("link", { name: "CVE-2026-7001" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "srv-import-01" })).toBeVisible();
+  });
+
+  test("powtórne wczytanie tego samego raportu niczego nie dubluje", async ({ page }) => {
+    await signUp(page);
+    await addAsset(page, {
+      name: "srv-import-02",
+      component: "openssl",
+      version: "3.0.2",
+      exposure: "internal",
+      criticality: "medium",
+    });
+
+    const raw = ["CVE,Component,CVSS", "CVE-2026-7002,openssl,7.4"].join("\n");
+    for (const oczekiwane of ["Dodano 1", "Dodano 0"]) {
+      await page.goto("/import");
+      await page.locator("#raw").fill(raw);
+      await page.getByRole("button", { name: "Wczytaj" }).click();
+      await expect(page.getByTestId("import-summary")).toContainText(oczekiwane);
+    }
+
+    await page.goto("/queue");
+    await expect(page.getByRole("link", { name: "CVE-2026-7002" })).toHaveCount(1);
+  });
+
+  test("znalezisko bez pasującego zasobu nie wchodzi po cichu", async ({ page }) => {
+    await signUp(page);
+    await addAsset(page, {
+      name: "srv-import-03",
+      component: "nginx",
+      version: "1.18.0",
+      exposure: "public",
+      criticality: "high",
+    });
+
+    await page.goto("/import");
+    await page.locator("#raw").fill(["CVE,Component,CVSS", "CVE-2026-7003,postfix,8.2"].join("\n"));
+    await page.getByRole("button", { name: "Wczytaj" }).click();
+
+    const summary = page.getByTestId("import-summary");
+    await expect(summary).toContainText("Dodano 0");
+    await expect(summary).toContainText("pominięto 1");
+  });
+});
+
 test.describe("główny przepływ", () => {
   test.skip(!configured, "brak konfiguracji Supabase");
 
