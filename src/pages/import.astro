@@ -1,0 +1,108 @@
+---
+import AppShell from "@/components/app/AppShell.astro";
+import { createClient } from "@/lib/supabase";
+import { listAssets } from "@/lib/services/patchqueue";
+import { SOURCE_FORMATS, SOURCE_LABEL } from "@/lib/domain/import/finding";
+import type { Asset } from "@/types";
+
+export const prerender = false;
+
+const db = createClient(Astro.request.headers, Astro.cookies);
+let assets: Asset[] = [];
+let error: string | null = Astro.url.searchParams.get("error");
+
+if (db) {
+  try {
+    assets = await listAssets(db);
+  } catch (cause) {
+    error = cause instanceof Error ? cause.message : "Nie udało się wczytać zasobów";
+  }
+}
+
+const params = Astro.url.searchParams;
+const added = params.get("added");
+const summary =
+  added === null
+    ? null
+    : {
+        format: params.get("format") ?? "",
+        added: Number(added),
+        skipped: Number(params.get("skipped") ?? "0"),
+        rejected: Number(params.get("rejected") ?? "0"),
+      };
+
+const field =
+  "w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-slate-400 focus:outline-none";
+const label = "mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400";
+---
+
+<AppShell title="Wczytaj z zewnętrznego źródła" error={error}>
+  {
+    summary && (
+      <div
+        data-testid="import-summary"
+        class="mb-6 rounded-lg border border-slate-700 bg-slate-900/60 px-4 py-3 text-sm"
+      >
+        <p class="text-slate-200">
+          Rozpoznany format:{" "}
+          <span class="font-medium">{SOURCE_LABEL[summary.format as keyof typeof SOURCE_LABEL]}</span>
+        </p>
+        <p class="mt-1 text-slate-400">
+          Dodano <span class="font-medium text-slate-100">{summary.added}</span>, pominięto{" "}
+          <span class="font-medium text-slate-100">{summary.skipped}</span>, nie zrozumiano{" "}
+          <span class="font-medium text-slate-100">{summary.rejected}</span> wierszy.
+        </p>
+        {summary.added > 0 && (
+          <a href="/queue" class="mt-2 inline-block text-slate-300 underline underline-offset-2 hover:text-white">
+            Zobacz kolejkę
+          </a>
+        )}
+      </div>
+    )
+  }
+
+  <div class="grid gap-8 lg:grid-cols-[1fr_18rem]">
+    <form method="POST" action="/api/import" class="space-y-4" id="import-form">
+      <div>
+        <label class:list={label} for="raw">Treść źródła</label>
+        <textarea
+          class:list={`${field} font-mono`}
+          id="raw"
+          name="raw"
+          rows="14"
+          required
+          placeholder="CVE,Component,Version,CVSS
+CVE-2026-1111,nginx,1.18.0,9.8"></textarea>
+      </div>
+      <button
+        type="submit"
+        class="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-white"
+      >
+        Wczytaj
+      </button>
+    </form>
+
+    <aside class="space-y-6">
+      <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+        <h2 class="mb-3 text-sm font-semibold text-slate-200">Format</h2>
+        <select class:list={field} id="format" name="format" form="import-form">
+          <option value="auto">rozpoznaj automatycznie</option>
+          {SOURCE_FORMATS.map((f) => <option value={f}>{SOURCE_LABEL[f]}</option>)}
+        </select>
+      </div>
+
+      <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+        <h2 class="mb-2 text-sm font-semibold text-slate-200">Dopasowanie do zasobów</h2>
+        <p class="mb-3 text-xs text-slate-500">
+          Znaleziska trafiają do zasobu o zgodnym komponencie. Te, których nie da się dopasować, można skierować do
+          jednego zasobu.
+        </p>
+        <label class:list={label} for="fallbackAssetId">Zasób domyślny</label>
+        <select class:list={field} id="fallbackAssetId" name="fallbackAssetId" form="import-form">
+          <option value="">brak — pomiń niedopasowane</option>
+          {assets.map((asset) => <option value={asset.id}>{asset.name}</option>)}
+        </select>
+      </div>
+    </aside>
+  </div>
+</AppShell>
