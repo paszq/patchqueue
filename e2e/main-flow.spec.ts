@@ -12,12 +12,18 @@ const PASSWORD = "TestoweHaslo123!";
 
 const configured = (process.env.SUPABASE_URL ?? "") !== "" && (process.env.SUPABASE_KEY ?? "") !== "";
 
+const inCI = (process.env.CI ?? "") !== "";
+
 if (!configured) {
-  // Cicho pominięty test przepływu wygląda w raporcie tak samo jak zdany.
-  console.warn(
-    "\n[UWAGA] Testy przepływu POMINIĘTE — brak SUPABASE_URL / SUPABASE_KEY.\n" +
-      "        Główna ścieżka użytkownika NIE została sprawdzona w tym przebiegu.\n",
-  );
+  if (inCI) {
+    // W pipelinie brak konfiguracji jest bledem, nie pominieciem. Cicho pominiety
+    // test bezpieczenstwa wyglada w raporcie tak samo jak zdany - a nie jest.
+    throw new Error(
+      "Brak SUPABASE_URL / SUPABASE_KEY w pipelinie. Testy nie moga zostac pominiete " +
+        "w miejscu, ktore ma pilnowac jakosci. Uzupelnij sekrety repozytorium.",
+    );
+  }
+  console.warn("\n[UWAGA] Testy POMINIETE lokalnie - brak SUPABASE_URL / SUPABASE_KEY.\n");
 }
 
 function freshEmail(): string {

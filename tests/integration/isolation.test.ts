@@ -17,11 +17,18 @@ const SUPABASE_URL = process.env.SUPABASE_URL ?? "";
 const SUPABASE_KEY = process.env.SUPABASE_KEY ?? "";
 const configured = SUPABASE_URL !== "" && SUPABASE_KEY !== "";
 
+const inCI = (process.env.CI ?? "") !== "";
+
 if (!configured) {
-  console.warn(
-    "\n[UWAGA] Testy izolacji kont POMINIĘTE — brak SUPABASE_URL / SUPABASE_KEY.\n" +
-      "        Dowód na izolację danych NIE został przeprowadzony w tym przebiegu.\n",
-  );
+  if (inCI) {
+    // W pipelinie brak konfiguracji jest bledem, nie pominieciem. Cicho pominiety
+    // test bezpieczenstwa wyglada w raporcie tak samo jak zdany - a nie jest.
+    throw new Error(
+      "Brak SUPABASE_URL / SUPABASE_KEY w pipelinie. Testy nie moga zostac pominiete " +
+        "w miejscu, ktore ma pilnowac jakosci. Uzupelnij sekrety repozytorium.",
+    );
+  }
+  console.warn("\n[UWAGA] Testy POMINIETE lokalnie - brak SUPABASE_URL / SUPABASE_KEY.\n");
 }
 
 const suite = configured ? describe : describe.skip;
