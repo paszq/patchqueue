@@ -30,8 +30,11 @@ jobs:
         run: npm run lint
       - name: Kontrola typów
         run: npm run typecheck
-      - name: Testy jednostkowe (reguły domenowe)
+      - name: Testy jednostkowe i integracyjne
         run: npm test
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
       - name: Build
         run: npm run build
         env:
