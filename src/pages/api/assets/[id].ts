@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { backTo, firstIssue, isResponse, messageOf, requireSession } from "@/lib/api";
-import { deleteAsset, updateAsset } from "@/lib/services/patchqueue";
+import { deleteAsset, loadMonitoredAsset, updateAsset } from "@/lib/services/patchqueue";
 
 export const prerender = false;
 
@@ -25,6 +25,15 @@ export const POST: APIRoute = async (context) => {
 
   if (deleteSchema.safeParse(payload).success) {
     try {
+      // Reguła domenowa odmawia pierwsza, z komunikatem wyrażonym w języku produktu.
+      // Wyzwalacz w bazie zostaje jako ostateczny strażnik — chroni także przed
+      // zapisem z pominięciem aplikacji.
+      const monitored = await loadMonitoredAsset(session.db, id);
+      const objection = monitored.removalObjection();
+      if (objection !== null) {
+        return backTo(context, `/assets/${id}`, objection);
+      }
+
       await deleteAsset(session.db, id);
       return backTo(context, "/assets");
     } catch (error) {

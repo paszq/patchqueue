@@ -21,4 +21,4 @@ export {
 } from "./vulnerabilities";
 export type { DecisionInput } from "./decisions";
 export { listDecisions, recordDecision } from "./decisions";
-export { buildEntry, getVulnerabilityWithAsset, loadQueue } from "./queue";
+export { buildEntry, getVulnerabilityWithAsset, loadMonitoredAsset, loadQueue } from "./queue";
