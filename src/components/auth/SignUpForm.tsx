@@ -11,6 +11,11 @@ interface Props {
   serverError?: string | null;
 }
 
+/** FormData.get zwraca tez pliki — do walidacji interesuje nas wylacznie tekst. */
+function textField(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
+
 export default function SignUpForm({ serverError }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,38 +24,60 @@ export default function SignUpForm({ serverError }: Props) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
 
-  function validate() {
+  /**
+   * Walidacja czyta wartosci z samego formularza, a nie ze stanu komponentu — patrz
+   * komentarz w SignInForm. Autouzupelnianie i wpisywanie przed uaktywnieniem wyspy
+   * omijaja stan Reacta, a formularz i tak musi dzialac.
+   */
+  function validate(form: HTMLFormElement) {
+    const data = new FormData(form);
+    const emailValue = textField(data.get("email")).trim();
+    const passwordValue = textField(data.get("password"));
+    const confirmValue = textField(data.get("confirmPassword"));
+
     const next: typeof errors = {};
 
-    if (!email.trim()) {
+    if (!emailValue) {
       next.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
       next.email = "Enter a valid email address";
     }
 
-    if (!password) {
+    if (!passwordValue) {
       next.password = "Password is required";
-    } else if (password.length < MIN_PASSWORD_LENGTH) {
+    } else if (passwordValue.length < MIN_PASSWORD_LENGTH) {
       next.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters`;
     }
 
-    if (!confirmPassword) {
+    if (!confirmValue) {
       next.confirmPassword = "Please confirm your password";
-    } else if (password !== confirmPassword) {
+    } else if (passwordValue !== confirmValue) {
       next.confirmPassword = "Passwords do not match";
     }
 
-    setErrors(next);
-    return Object.keys(next).length === 0;
+    const valid = Object.keys(next).length === 0;
+    setErrors(valid ? {} : next);
+    return valid;
   }
 
   function clearError(field: keyof typeof errors) {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   }
 
+  /**
+   * Wysylka jest wstrzymywana zawsze, a formularz wysylany recznie po sprawdzeniu.
+   *
+   * Powod: przy polach kontrolowanych React po kazdym renderze przywraca wartosci ze
+   * stanu. Wywolanie setErrors tuz przed natywna wysylka kasowalo wiec wartosci
+   * wpisane przez menedzer hasel albo autouzupelnianie - do serwera szly puste pola.
+   * form.submit() startuje nawigacje z tym, co faktycznie jest w polach, i pomija
+   * ponowne wywolanie tej funkcji.
+   */
   function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    if (!validate()) {
-      e.preventDefault();
+    e.preventDefault();
+    const form = e.currentTarget;
+    if (validate(form)) {
+      form.submit();
     }
   }
 

@@ -86,6 +86,34 @@ async function addVulnerability(page: Page, identifier: string, cvss: string): P
   await page.waitForURL(/\/items\/[0-9a-f-]{36}/);
 }
 
+test.describe("formularze uwierzytelniania", () => {
+  test.skip(!configured, "brak konfiguracji Supabase");
+
+  /**
+   * Regresja: walidacja opierała się na stanie Reacta, a menedżer haseł i
+   * autouzupełnianie wpisują wartości prosto do DOM, nie wywołując zdarzeń. Formularz
+   * uznawał wypełnione pola za puste i blokował wysyłkę — użytkownik widział wpisane
+   * dane i przycisk, który nic nie robi.
+   */
+  test("logowanie działa, gdy pola wypełnia autouzupełnianie z pominięciem Reacta", async ({ page }) => {
+    await page.goto("/auth/signin");
+    await page.waitForLoadState("networkidle");
+
+    await page.evaluate(() => {
+      const set = (id: string, value: string) => {
+        const input = document.querySelector<HTMLInputElement>(`#${id}`);
+        if (input) input.value = value;
+      };
+      set("email", "demo@example.com");
+      set("password", "Demo12345!");
+    });
+
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await page.waitForURL(/\/queue/, { timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: "Kolejka" })).toBeVisible();
+  });
+});
+
 test.describe("główny przepływ", () => {
   test.skip(!configured, "brak konfiguracji Supabase");
 

@@ -59,6 +59,19 @@ const reactConfig = tseslint.config({
   },
 });
 
+// Skrypty pomocnicze uruchamiane przez Node, poza aplikacja i poza sprawdzaniem typow.
+const nodeScriptsConfig = tseslint.config({
+  files: ["scripts/**/*.mjs"],
+  extends: [tseslint.configs.disableTypeChecked],
+  languageOptions: {
+    globals: { process: "readonly", console: "readonly" },
+  },
+  rules: {
+    "no-undef": "off",
+    "no-console": "off",
+  },
+});
+
 const astroConfig = tseslint.config({
   files: ["**/*.astro"],
   rules: {
@@ -75,5 +88,6 @@ export default tseslint.config(
   eslintPluginAstro.configs["flat/recommended"],
   ...eslintPluginAstro.configs["flat/jsx-a11y-recommended"],
   astroConfig,
+  nodeScriptsConfig,
   eslintPluginPrettier,
 );
