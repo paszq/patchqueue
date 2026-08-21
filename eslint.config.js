@@ -61,10 +61,10 @@ const reactConfig = tseslint.config({
 
 // Skrypty pomocnicze uruchamiane przez Node, poza aplikacja i poza sprawdzaniem typow.
 const nodeScriptsConfig = tseslint.config({
-  files: ["scripts/**/*.mjs"],
+  files: ["scripts/**/*.mjs", ".dependency-cruiser.cjs"],
   extends: [tseslint.configs.disableTypeChecked],
   languageOptions: {
-    globals: { process: "readonly", console: "readonly" },
+    globals: { process: "readonly", console: "readonly", module: "writable", require: "readonly" },
   },
   rules: {
     "no-undef": "off",

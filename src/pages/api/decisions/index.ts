@@ -33,7 +33,7 @@ export const POST: APIRoute = async (context) => {
   }
 
   try {
-    await recordDecision(session.db, session.userId, {
+    await recordDecision(session.db, {
       vulnerabilityId: parsed.data.vulnerabilityId,
       kind: parsed.data.kind,
       reason: parsed.data.reason ?? null,

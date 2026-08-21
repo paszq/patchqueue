@@ -226,27 +226,23 @@ export interface DecisionInput {
 }
 
 /**
- * Rozstrzygnięcie to dopisanie wpisu do historii i przestawienie stanu pozycji.
- * Historia jest niezmienialna — baza nie ma polityki pozwalającej ją nadpisać.
+ * Rozstrzygnięcie to jedna operacja: wpis do historii i zmiana stanu pozycji.
+ *
+ * Oba zapisy wykonuje funkcja w bazie, w jednej transakcji. Wcześniej robiła to
+ * warstwa danych dwoma niezależnymi wywołaniami — gdy drugie zawiodło, historia
+ * twierdziła, że pozycję rozstrzygnięto, a pozycja zostawała otwarta. Ponieważ
+ * historia nie przyjmuje ani zmian, ani usunięć, taka rozbieżność była trwała.
+ *
+ * Funkcja działa w kontekście wywołującego, więc polityki dostępu obowiązują tak samo
+ * jak przy zwykłych zapytaniach — cudzej pozycji nie rozstrzygnie.
  */
-export async function recordDecision(db: SupabaseClient, userId: string, input: DecisionInput): Promise<void> {
-  const { error: decisionError } = await db.from("decisions").insert({
-    user_id: userId,
-    vulnerability_id: input.vulnerabilityId,
-    kind: input.kind,
-    reason: input.reason,
+export async function recordDecision(db: SupabaseClient, input: DecisionInput): Promise<void> {
+  const { error } = await db.rpc("record_decision", {
+    p_vulnerability_id: input.vulnerabilityId,
+    p_kind: input.kind,
+    p_reason: input.reason,
   });
-  if (decisionError !== null) throw new DataAccessError(decisionError.message);
-
-  const reopened = input.kind === "reopened";
-  const { error: statusError } = await db
-    .from("vulnerabilities")
-    .update({
-      status: reopened ? "open" : input.kind,
-      resolved_at: reopened ? null : new Date().toISOString(),
-    })
-    .eq("id", input.vulnerabilityId);
-  if (statusError !== null) throw new DataAccessError(statusError.message);
+  if (error !== null) throw new DataAccessError(error.message);
 }
 
 export async function listDecisions(db: SupabaseClient, vulnerabilityId: string): Promise<Decision[]> {

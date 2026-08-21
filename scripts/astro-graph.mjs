@@ -47,7 +47,9 @@ const layerOf = (path) => {
   return "inne";
 };
 
-const violations = edges.filter((e) => layerOf(e.from) !== "domena" && e.to.startsWith("src/lib/domain") && layerOf(e.from) === "widok");
+const violations = edges.filter(
+  (e) => layerOf(e.from) !== "domena" && e.to.startsWith("src/lib/domain") && layerOf(e.from) === "widok",
+);
 
 writeFileSync("/tmp/astro-edges.json", JSON.stringify({ edges, violations }, null, 2));
 
@@ -60,7 +62,8 @@ for (const e of edges) {
   counts[key] = (counts[key] ?? 0) + 1;
 }
 console.log("przeplyw miedzy warstwami:");
-for (const [k, v] of Object.entries(counts).sort((a, b) => b[1] - a[1])) console.log(`  ${String(v).padStart(2)}x  ${k}`);
+for (const [k, v] of Object.entries(counts).sort((a, b) => b[1] - a[1]))
+  console.log(`  ${String(v).padStart(2)}x  ${k}`);
 
 console.log("\nstrony siegajace wprost do reguly domenowej (pomijajac warstwe danych):");
 const direct = edges.filter((e) => e.to.startsWith("src/lib/domain") && layerOf(e.from) !== "dane");
