@@ -9,6 +9,14 @@ if (existsSync(".env")) {
 
 const PORT = 4321;
 
+/**
+ * Domyslnie testy uruchamiaja wlasny serwer deweloperski. Podanie BASE_URL kieruje
+ * ten sam zestaw na wdrozona instancje — ta sama sciezka uzytkownika sprawdzana tam,
+ * gdzie naprawde stoi aplikacja, a nie tylko na localhoscie.
+ */
+const EXTERNAL_URL = process.env.BASE_URL ?? "";
+const baseURL = EXTERNAL_URL !== "" ? EXTERNAL_URL : `http://localhost:${PORT}`;
+
 export default defineConfig({
   testDir: "./e2e",
   // Testy dzielą jeden serwer deweloperski i jeden projekt bazy. Równoległość dawała
@@ -19,14 +27,17 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: `http://localhost:${PORT}`,
+    baseURL,
     trace: "on-first-retry",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: {
-    command: "npm run dev",
-    url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer:
+    EXTERNAL_URL !== ""
+      ? undefined
+      : {
+          command: "npm run dev",
+          url: `http://localhost:${PORT}`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 120_000,
+        },
 });

@@ -107,7 +107,7 @@ test.describe("formularze uwierzytelniania", () => {
       {
         name: `sb-${projectRef}-auth-token`,
         value: "base64-cGF0Y2hxdWV1ZS11c3prb2R6b25l",
-        domain: "localhost",
+        domain: new URL(process.env.BASE_URL ?? "http://localhost:4321").hostname,
         path: "/",
       },
     ]);
