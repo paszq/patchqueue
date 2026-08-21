@@ -95,6 +95,36 @@ test.describe("formularze uwierzytelniania", () => {
    * uznawał wypełnione pola za puste i blokował wysyłkę — użytkownik widział wpisane
    * dane i przycisk, który nic nie robi.
    */
+  /**
+   * Regresja: nieczytelne ciasteczko sesji — nadgryzione, wygasłe albo pozostałe po
+   * innym projekcie — zostawiało użytkownika w pętli. Strona chroniona odsyłała na
+   * logowanie, logowanie dokładało nowe ciasteczko obok starego, a odczyt sesji nadal
+   * się nie udawał. Zgłoszone z realnego użycia, nie wymyślone przy biurku.
+   */
+  test("zepsute ciasteczko sesji nie zapętla użytkownika", async ({ page, context }) => {
+    const projectRef = new URL(process.env.SUPABASE_URL ?? "https://x.supabase.co").hostname.split(".")[0];
+    await context.addCookies([
+      {
+        name: `sb-${projectRef}-auth-token`,
+        value: "base64-cGF0Y2hxdWV1ZS11c3prb2R6b25l",
+        domain: "localhost",
+        path: "/",
+      },
+    ]);
+
+    await page.goto("/queue");
+    await page.waitForLoadState("networkidle");
+    expect(page.url()).toContain("/auth/signin");
+
+    const remaining = (await context.cookies()).filter((cookie) => cookie.name.startsWith("sb-"));
+    expect(remaining).toHaveLength(0);
+
+    await page.locator("#email").fill("demo@example.com");
+    await page.locator("#password").fill("Demo12345!");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await page.waitForURL(/\/queue/, { timeout: 20_000 });
+  });
+
   test("logowanie działa, gdy pola wypełnia autouzupełnianie z pominięciem Reacta", async ({ page }) => {
     await page.goto("/auth/signin");
     await page.waitForLoadState("networkidle");
