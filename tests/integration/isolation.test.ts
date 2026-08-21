@@ -239,6 +239,31 @@ suite("nienaruszalność rozstrzygnięć", () => {
     }
   }, 30_000);
 
+  it("pozycji z zapisaną historią nie da się usunąć", async () => {
+    const account = await signUpAccount("history");
+    try {
+      const assetId = await insertAsset(account, { name: "srv-hist-01", component: "nginx", version: "1.20" });
+      const vulnId = await insertVulnerability(account, assetId, "CVE-2026-0004", 6.4);
+
+      await account.client.from("decisions").insert({
+        user_id: account.userId,
+        vulnerability_id: vulnId,
+        kind: "rejected",
+        reason: "nie dotyczy tej konfiguracji",
+      });
+
+      // Kaskada z klucza obcego omijalaby polityki dostepu, wiec slad decyzji
+      // musi chronic wyzwalacz, a nie brak polityki DELETE na historii.
+      const { error } = await account.client.from("vulnerabilities").delete().eq("id", vulnId);
+      expect(error).not.toBeNull();
+
+      const { data: trail } = await account.client.from("decisions").select("id").eq("vulnerability_id", vulnId);
+      expect(trail ?? []).toHaveLength(1);
+    } finally {
+      await account.client.auth.signOut();
+    }
+  }, 30_000);
+
   it("usunięcie zasobu z otwartą pozycją jest odrzucane", async () => {
     const account = await signUpAccount("openitem");
     try {
