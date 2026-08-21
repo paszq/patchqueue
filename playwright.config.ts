@@ -1,4 +1,11 @@
+import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
+
+// Bez tego proces uruchamiajacy testy nie widzi konfiguracji i caly zestaw pomija sie
+// po cichu, mimo ze serwer deweloperski dziala poprawnie.
+if (existsSync(".env")) {
+  process.loadEnvFile(".env");
+}
 
 const PORT = 4321;
 

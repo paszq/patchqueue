@@ -29,30 +29,136 @@ const ASSETS = [
   { key: "web", name: "srv-web-01", component: "nginx", version: "1.18.0", exposure: "public", criticality: "high" },
   { key: "api", name: "srv-api-01", component: "node", version: "18.12.0", exposure: "public", criticality: "high" },
   { key: "db", name: "srv-db-01", component: "postgresql", version: "14.2", exposure: "internal", criticality: "high" },
-  { key: "mail", name: "srv-mail-01", component: "postfix", version: "3.6.4", exposure: "public", criticality: "medium" },
-  { key: "ws", name: "ws-ksiegowosc-03", component: "windows", version: "10 22H2", exposure: "internal", criticality: "medium" },
-  { key: "nas", name: "nas-backup-01", component: "synology-dsm", version: "7.1.1", exposure: "internal", criticality: "high" },
-  { key: "lab", name: "lab-offline-01", component: "openssl", version: "3.0.2", exposure: "isolated", criticality: "low" },
-  { key: "prn", name: "drukarka-hall", component: "hp-firmware", version: "1.4.2", exposure: "internal", criticality: "low" },
+  {
+    key: "mail",
+    name: "srv-mail-01",
+    component: "postfix",
+    version: "3.6.4",
+    exposure: "public",
+    criticality: "medium",
+  },
+  {
+    key: "ws",
+    name: "ws-ksiegowosc-03",
+    component: "windows",
+    version: "10 22H2",
+    exposure: "internal",
+    criticality: "medium",
+  },
+  {
+    key: "nas",
+    name: "nas-backup-01",
+    component: "synology-dsm",
+    version: "7.1.1",
+    exposure: "internal",
+    criticality: "high",
+  },
+  {
+    key: "lab",
+    name: "lab-offline-01",
+    component: "openssl",
+    version: "3.0.2",
+    exposure: "isolated",
+    criticality: "low",
+  },
+  {
+    key: "prn",
+    name: "drukarka-hall",
+    component: "hp-firmware",
+    version: "1.4.2",
+    exposure: "internal",
+    criticality: "low",
+  },
 ];
 
 const VULNS = [
   // Sedno: 5.0 na zasobie wystawionym stoi nad 9.8 na maszynie odciętej.
-  { asset: "web", id: "CVE-2026-1111", cvss: 5.0, days: 2, desc: "Ujawnienie nagłówków serwera w odpowiedzi na spreparowane żądanie." },
-  { asset: "lab", id: "CVE-2026-9999", cvss: 9.8, days: 30, desc: "Zdalne wykonanie kodu w bibliotece kryptograficznej." },
+  {
+    asset: "web",
+    id: "CVE-2026-1111",
+    cvss: 5.0,
+    days: 2,
+    desc: "Ujawnienie nagłówków serwera w odpowiedzi na spreparowane żądanie.",
+  },
+  {
+    asset: "lab",
+    id: "CVE-2026-9999",
+    cvss: 9.8,
+    days: 30,
+    desc: "Zdalne wykonanie kodu w bibliotece kryptograficznej.",
+  },
 
-  { asset: "web", id: "CVE-2026-1234", cvss: 9.8, days: 10, desc: "Przepełnienie bufora w obsłudze nagłówka Host prowadzące do wykonania kodu." },
-  { asset: "api", id: "CVE-2026-2001", cvss: 7.5, days: 1, desc: "Odmowa usługi przez rekurencyjne rozwijanie JSON-a." },
+  {
+    asset: "web",
+    id: "CVE-2026-1234",
+    cvss: 9.8,
+    days: 10,
+    desc: "Przepełnienie bufora w obsłudze nagłówka Host prowadzące do wykonania kodu.",
+  },
+  {
+    asset: "api",
+    id: "CVE-2026-2001",
+    cvss: 7.5,
+    days: 1,
+    desc: "Odmowa usługi przez rekurencyjne rozwijanie JSON-a.",
+  },
   { asset: "api", id: "CVE-2026-8080", cvss: 4.3, days: 5, desc: "Wyciek ścieżek systemu plików w komunikacie błędu." },
-  { asset: "db", id: "CVE-2026-3310", cvss: 9.1, days: 20, desc: "Podniesienie uprawnień przez funkcję definiowaną przez użytkownika." },
-  { asset: "mail", id: "CVE-2026-4102", cvss: 8.1, days: 3, desc: "Przemyt nagłówków SMTP umożliwiający podszycie się pod nadawcę." },
-  { asset: "ws", id: "CVE-2026-5150", cvss: 7.8, days: 70, desc: "Podniesienie uprawnień lokalnych przez usługę drukowania." },
-  { asset: "nas", id: "CVE-2026-6001", cvss: 6.5, days: 12, desc: "Nieuwierzytelniony odczyt konfiguracji przez panel zarządzania." },
-  { asset: "prn", id: "CVE-2026-7050", cvss: 5.3, days: 40, desc: "Ujawnienie listy zadań drukowania bez uwierzytelnienia." },
+  {
+    asset: "db",
+    id: "CVE-2026-3310",
+    cvss: 9.1,
+    days: 20,
+    desc: "Podniesienie uprawnień przez funkcję definiowaną przez użytkownika.",
+  },
+  {
+    asset: "mail",
+    id: "CVE-2026-4102",
+    cvss: 8.1,
+    days: 3,
+    desc: "Przemyt nagłówków SMTP umożliwiający podszycie się pod nadawcę.",
+  },
+  {
+    asset: "ws",
+    id: "CVE-2026-5150",
+    cvss: 7.8,
+    days: 70,
+    desc: "Podniesienie uprawnień lokalnych przez usługę drukowania.",
+  },
+  {
+    asset: "nas",
+    id: "CVE-2026-6001",
+    cvss: 6.5,
+    days: 12,
+    desc: "Nieuwierzytelniony odczyt konfiguracji przez panel zarządzania.",
+  },
+  {
+    asset: "prn",
+    id: "CVE-2026-7050",
+    cvss: 5.3,
+    days: 40,
+    desc: "Ujawnienie listy zadań drukowania bez uwierzytelnienia.",
+  },
 
   // Rozstrzygnięte — pokazują historię i to, że decyzja zostaje.
-  { asset: "db", id: "CVE-2026-0500", cvss: 6.1, days: 45, desc: "Wyciek metadanych zapytań w logach.", decision: { kind: "patched", reason: null } },
-  { asset: "lab", id: "CVE-2026-0600", cvss: 8.2, days: 60, desc: "Podatność w module TLS.", decision: { kind: "rejected", reason: "Maszyna w segmencie bez trasy na zewnatrz, modul TLS nieuzywany w tej konfiguracji." } },
+  {
+    asset: "db",
+    id: "CVE-2026-0500",
+    cvss: 6.1,
+    days: 45,
+    desc: "Wyciek metadanych zapytań w logach.",
+    decision: { kind: "patched", reason: null },
+  },
+  {
+    asset: "lab",
+    id: "CVE-2026-0600",
+    cvss: 8.2,
+    days: 60,
+    desc: "Podatność w module TLS.",
+    decision: {
+      kind: "rejected",
+      reason: "Maszyna w segmencie bez trasy na zewnatrz, modul TLS nieuzywany w tej konfiguracji.",
+    },
+  },
 ];
 
 const db = createClient(URL, KEY);
@@ -85,7 +191,11 @@ if ((existing ?? []).length > 0) {
 const ids = {};
 for (const asset of ASSETS) {
   const { key, ...row } = asset;
-  const { data, error } = await db.from("assets").insert({ user_id: userId, ...row }).select("id").single();
+  const { data, error } = await db
+    .from("assets")
+    .insert({ user_id: userId, ...row })
+    .select("id")
+    .single();
   if (error) {
     console.error(`Zasób ${row.name}: ${error.message}`);
     process.exit(1);
