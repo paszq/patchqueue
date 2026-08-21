@@ -1,0 +1,255 @@
+---
+import AppShell from "@/components/app/AppShell.astro";
+import PriorityBadge from "@/components/app/PriorityBadge.astro";
+import { createClient } from "@/lib/supabase";
+import { buildEntry, getAsset, listVulnerabilitiesForAsset } from "@/lib/services/patchqueue";
+import type { Asset, QueueEntry } from "@/types";
+
+export const prerender = false;
+
+const db = createClient(Astro.request.headers, Astro.cookies);
+const id = Astro.params.id ?? "";
+let asset: Asset | null = null;
+let entries: QueueEntry[] = [];
+let error: string | null = Astro.url.searchParams.get("error");
+
+if (db) {
+  try {
+    const loaded = await getAsset(db, id);
+    asset = loaded;
+    const vulnerabilities = await listVulnerabilitiesForAsset(db, id);
+    entries = vulnerabilities.map((vulnerability) => buildEntry(vulnerability, loaded));
+  } catch (cause) {
+    error = cause instanceof Error ? cause.message : "Nie udało się wczytać zasobu";
+  }
+}
+
+const openCount = entries.filter((entry) => entry.vulnerability.status === "open").length;
+const field =
+  "w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-slate-400 focus:outline-none";
+const label = "mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400";
+const statusLabel = { open: "otwarta", patched: "załatana", rejected: "odrzucona" } as const;
+---
+
+<AppShell title={asset ? asset.name : "Zasób"} error={error}>
+  {
+    asset === null ? (
+      <p class="text-slate-400">
+        Nie znaleziono zasobu.{" "}
+        <a href="/assets" class="underline">
+          Wróć do listy
+        </a>
+        .
+      </p>
+    ) : (
+      <div class="grid gap-8 lg:grid-cols-[1fr_20rem]">
+        <section class="space-y-8">
+          <div>
+            <div class="mb-3 flex items-baseline justify-between">
+              <h2 class="text-sm font-semibold text-slate-200">Podatności</h2>
+              <span class="text-xs text-slate-500">
+                {entries.length} łącznie, {openCount} otwartych
+              </span>
+            </div>
+            {entries.length === 0 ? (
+              <div class="rounded-lg border border-dashed border-slate-700 bg-slate-900/40 px-6 py-8 text-center text-sm text-slate-400">
+                Ten zasób nie ma jeszcze żadnych podatności.
+              </div>
+            ) : (
+              <div class="overflow-x-auto rounded-lg border border-slate-800">
+                <table class="w-full text-left text-sm">
+                  <thead class="bg-slate-900/80 text-xs tracking-wide text-slate-400 uppercase">
+                    <tr>
+                      <th scope="col" class="px-4 py-3 font-medium">
+                        Priorytet
+                      </th>
+                      <th scope="col" class="px-4 py-3 font-medium">
+                        Identyfikator
+                      </th>
+                      <th scope="col" class="px-4 py-3 font-medium">
+                        CVSS
+                      </th>
+                      <th scope="col" class="px-4 py-3 font-medium">
+                        Stan
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-800">
+                    {entries.map((entry) => (
+                      <tr class="hover:bg-slate-900/50">
+                        <td class="px-4 py-3">
+                          <PriorityBadge priority={entry.assessment.priority} score={entry.assessment.score} />
+                        </td>
+                        <td class="px-4 py-3">
+                          <a
+                            href={`/items/${entry.vulnerability.id}`}
+                            class="font-medium text-slate-100 hover:underline"
+                          >
+                            {entry.vulnerability.identifier}
+                          </a>
+                        </td>
+                        <td class="px-4 py-3 font-mono text-slate-400">{entry.vulnerability.cvss.toFixed(1)}</td>
+                        <td class="px-4 py-3 text-slate-400">{statusLabel[entry.vulnerability.status]}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+            <h2 class="mb-4 text-sm font-semibold text-slate-200">Dopisz podatność</h2>
+            <form method="POST" action="/api/vulnerabilities" class="grid gap-4 sm:grid-cols-[1fr_7rem]">
+              <input type="hidden" name="assetId" value={asset.id} />
+              <div>
+                <label class:list={label} for="identifier">
+                  Identyfikator
+                </label>
+                <input
+                  class:list={field}
+                  id="identifier"
+                  name="identifier"
+                  required
+                  maxlength="100"
+                  placeholder="CVE-2026-1234"
+                />
+              </div>
+              <div>
+                <label class:list={label} for="cvss">
+                  Ocena CVSS
+                </label>
+                <input
+                  class:list={field}
+                  id="cvss"
+                  name="cvss"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="10"
+                  required
+                  placeholder="9.8"
+                />
+              </div>
+              <div class="sm:col-span-2">
+                <label class:list={label} for="description">
+                  Opis
+                </label>
+                <textarea class:list={field} id="description" name="description" rows="3" maxlength="5000" />
+              </div>
+              <div class="sm:col-span-2">
+                <button
+                  type="submit"
+                  class="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-white"
+                >
+                  Dopisz i wylicz priorytet
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <aside class="space-y-6">
+          <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+            <h2 class="mb-4 text-sm font-semibold text-slate-200">Dane zasobu</h2>
+            <p class="mb-4 text-xs text-slate-500">
+              Zmiana ekspozycji przelicza priorytety wszystkich otwartych pozycji tego zasobu.
+            </p>
+            <form method="POST" action={`/api/assets/${asset.id}`} class="space-y-4">
+              <input type="hidden" name="_action" value="update" />
+              <div>
+                <label class:list={label} for="edit-name">
+                  Nazwa
+                </label>
+                <input class:list={field} id="edit-name" name="name" required maxlength="200" value={asset.name} />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class:list={label} for="edit-component">
+                    Komponent
+                  </label>
+                  <input
+                    class:list={field}
+                    id="edit-component"
+                    name="component"
+                    required
+                    maxlength="200"
+                    value={asset.component}
+                  />
+                </div>
+                <div>
+                  <label class:list={label} for="edit-version">
+                    Wersja
+                  </label>
+                  <input
+                    class:list={field}
+                    id="edit-version"
+                    name="version"
+                    required
+                    maxlength="100"
+                    value={asset.version}
+                  />
+                </div>
+              </div>
+              <div>
+                <label class:list={label} for="edit-exposure">
+                  Ekspozycja
+                </label>
+                <select class:list={field} id="edit-exposure" name="exposure" required>
+                  <option value="public" selected={asset.exposure === "public"}>
+                    osiągalny z sieci publicznej
+                  </option>
+                  <option value="internal" selected={asset.exposure === "internal"}>
+                    tylko z sieci wewnętrznej
+                  </option>
+                  <option value="isolated" selected={asset.exposure === "isolated"}>
+                    odcięty
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class:list={label} for="edit-criticality">
+                  Krytyczność
+                </label>
+                <select class:list={field} id="edit-criticality" name="criticality" required>
+                  <option value="high" selected={asset.criticality === "high"}>
+                    wysoka
+                  </option>
+                  <option value="medium" selected={asset.criticality === "medium"}>
+                    średnia
+                  </option>
+                  <option value="low" selected={asset.criticality === "low"}>
+                    niska
+                  </option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                class="w-full rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-white"
+              >
+                Zapisz zmiany
+              </button>
+            </form>
+          </div>
+
+          <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+            <h2 class="mb-2 text-sm font-semibold text-slate-200">Usunięcie zasobu</h2>
+            <p class="mb-4 text-xs text-slate-500">
+              Możliwe dopiero wtedy, gdy żadna pozycja tego zasobu nie jest już otwarta. Inaczej zniknąłby ślad
+              nierozstrzygniętych decyzji.
+            </p>
+            <form method="POST" action={`/api/assets/${asset.id}`}>
+              <input type="hidden" name="_action" value="delete" />
+              <button
+                type="submit"
+                class="w-full rounded-md border border-red-800 px-4 py-2 text-sm font-medium text-red-300 transition-colors hover:bg-red-950"
+              >
+                Usuń zasób
+              </button>
+            </form>
+          </div>
+        </aside>
+      </div>
+    )
+  }
+</AppShell>

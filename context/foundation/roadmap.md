@@ -40,17 +40,17 @@ głównej tezy produktu; wszystko dalsze ma znaczenie tylko wtedy, gdy ten momen
 
 | ID | Change ID | Outcome (użytkownik może …) | Prerequisites | PRD refs | Status |
 | --- | --- | --- | --- | --- | --- |
-| F-01 | project-scaffold | (fundament) szkielet aplikacji stoi, bramki jakości przechodzą lokalnie | — | NFR-01, NFR-03 | ready |
-| F-02 | account-isolation | (fundament) konto rozdziela dane, izolacja wymuszana przez bazę | F-01 | NFR-05, Access Control | proposed |
-| F-03 | verification-pipeline | (fundament) każda zmiana przechodzi lint, typy i testy automatycznie | F-01, S-01 | NFR-01, NFR-05 | proposed |
-| S-01 | first-sign-in | założyć konto, zalogować się i zobaczyć pustą kolejkę z wyjaśnieniem | F-01, F-02 | US-01, FR-001, FR-002 | proposed |
-| S-02 | asset-registry | zarejestrować zasób z ekspozycją i krytycznością oraz zobaczyć go na liście | S-01 | FR-003, FR-004 | proposed |
-| S-03 | priority-visible | dopisać podatność i zobaczyć priorytet, jego składniki oraz termin | S-02 | US-01, FR-007, FR-010, FR-011 | in-progress |
-| S-04 | ordered-queue | zobaczyć kolejkę uporządkowaną priorytetem, z oznaczeniem pozycji po terminie | S-03 | US-01, FR-012, NFR-01 | proposed |
-| S-05 | decision-trail | zamknąć pozycję jako załataną albo odrzuconą z powodem i wrócić do uzasadnienia | S-04 | US-01, FR-013, FR-014, FR-015 | proposed |
-| S-06 | reopen-decision | przywrócić zamkniętą pozycję do kolejki bez utraty poprzedniego rozstrzygnięcia | S-05 | US-04, FR-016 | proposed |
-| S-07 | exposure-recalc | zmienić ekspozycję zasobu i zobaczyć przeliczoną kolejkę | S-04 | US-02, FR-005 | proposed |
-| S-08 | safe-removal | poprawiać i usuwać wpisy bez naruszenia śladu decyzji | S-05 | US-03, FR-006, FR-008, FR-009 | proposed |
+| F-01 | project-scaffold | (fundament) szkielet aplikacji stoi, bramki jakości przechodzą lokalnie | — | NFR-01, NFR-03 | done |
+| F-02 | account-isolation | (fundament) konto rozdziela dane, izolacja wymuszana przez bazę | F-01 | NFR-05, Access Control | done |
+| F-03 | verification-pipeline | (fundament) każda zmiana przechodzi lint, typy i testy automatycznie | F-01, S-01 | NFR-01, NFR-05 | done |
+| S-01 | first-sign-in | założyć konto, zalogować się i zobaczyć pustą kolejkę z wyjaśnieniem | F-01, F-02 | US-01, FR-001, FR-002 | done |
+| S-02 | asset-registry | zarejestrować zasób z ekspozycją i krytycznością oraz zobaczyć go na liście | S-01 | FR-003, FR-004 | done |
+| S-03 | priority-visible | dopisać podatność i zobaczyć priorytet, jego składniki oraz termin | S-02 | US-01, FR-007, FR-010, FR-011 | done |
+| S-04 | ordered-queue | zobaczyć kolejkę uporządkowaną priorytetem, z oznaczeniem pozycji po terminie | S-03 | US-01, FR-012, NFR-01 | done |
+| S-05 | decision-trail | zamknąć pozycję jako załataną albo odrzuconą z powodem i wrócić do uzasadnienia | S-04 | US-01, FR-013, FR-014, FR-015 | done |
+| S-06 | reopen-decision | przywrócić zamkniętą pozycję do kolejki bez utraty poprzedniego rozstrzygnięcia | S-05 | US-04, FR-016 | done |
+| S-07 | exposure-recalc | zmienić ekspozycję zasobu i zobaczyć przeliczoną kolejkę | S-04 | US-02, FR-005 | done |
+| S-08 | safe-removal | poprawiać i usuwać wpisy bez naruszenia śladu decyzji | S-05 | US-03, FR-006, FR-008, FR-009 | done |
 | S-09 | grounded-summary | poprosić o streszczenie i kroki naprawcze wyprowadzone z własnego opisu | S-03, F-03 | FR-017, NFR-02, NFR-04 | blocked |
 
 ## Streams
@@ -263,3 +263,7 @@ Stan repozytorium na 2026-08-20.
 
 ## Done
 
+- **F-01: szkielet aplikacji i bramki jakości** — 2026-08-20. Kursowy starter przyniósł też gotowe logowanie.
+- **F-02: konto i izolacja danych** — 2026-08-21. Polityki na poziomie wierszy dowiedzione 10 testami integracyjnymi.
+- **F-03: automatyczna weryfikacja zmian** — 2026-08-20. Lint, typy, testy jednostkowe i przeglądowe na każdej zmianie.
+- **S-01 do S-08: cała ścieżka główna** — 2026-08-21. Od pustej kolejki z wyjaśnieniem po przywracanie rozstrzygniętych pozycji. Cztery testy przeglądowe, w tym dowód, że kolejka układa się inaczej niż sortowanie po ocenie CVSS.

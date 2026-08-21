@@ -1,0 +1,125 @@
+---
+import AppShell from "@/components/app/AppShell.astro";
+import PriorityBadge from "@/components/app/PriorityBadge.astro";
+import { createClient } from "@/lib/supabase";
+import { loadQueue } from "@/lib/services/patchqueue";
+import { CRITICALITY_LABEL, EXPOSURE_LABEL, type QueueEntry } from "@/types";
+
+export const prerender = false;
+
+const db = createClient(Astro.request.headers, Astro.cookies);
+let entries: QueueEntry[] = [];
+let error: string | null = Astro.url.searchParams.get("error");
+
+if (db) {
+  try {
+    entries = await loadQueue(db);
+  } catch (cause) {
+    error = cause instanceof Error ? cause.message : "Nie udało się wczytać kolejki";
+  }
+}
+
+const overdue = entries.filter((entry) => entry.isOverdue).length;
+const dateFormat = new Intl.DateTimeFormat("pl-PL", { dateStyle: "medium" });
+---
+
+<AppShell title="Kolejka" error={error}>
+  {
+    entries.length === 0 ? (
+      <div class="rounded-lg border border-dashed border-slate-700 bg-slate-900/40 px-6 py-12 text-center">
+        <p class="text-slate-300">Kolejka jest pusta.</p>
+        <p class="mx-auto mt-2 max-w-md text-sm text-slate-500">
+          Kolejka pokazuje otwarte pozycje uporządkowane priorytetem. Żeby cokolwiek się w niej pojawiło, zarejestruj
+          zasób i dopisz do niego podatność — priorytet wyliczy się z oceny CVSS oraz ekspozycji i krytyczności tego
+          zasobu.
+        </p>
+        <a
+          href="/assets"
+          class="mt-6 inline-block rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-white"
+        >
+          Przejdź do zasobów
+        </a>
+      </div>
+    ) : (
+      <>
+        <p class="mb-4 text-sm text-slate-400">
+          {entries.length} {entries.length === 1 ? "otwarta pozycja" : "otwartych pozycji"}
+          {overdue > 0 && <span class="ml-2 text-red-300">· {overdue} po terminie</span>}
+        </p>
+
+        <div class="overflow-x-auto rounded-lg border border-slate-800">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-900/80 text-xs tracking-wide text-slate-400 uppercase">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-medium">
+                  Priorytet
+                </th>
+                <th scope="col" class="px-4 py-3 font-medium">
+                  Podatność
+                </th>
+                <th scope="col" class="px-4 py-3 font-medium">
+                  Zasób
+                </th>
+                <th scope="col" class="px-4 py-3 font-medium">
+                  Składniki
+                </th>
+                <th scope="col" class="px-4 py-3 font-medium">
+                  Termin
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+              {entries.map((entry) => (
+                <tr class:list={["hover:bg-slate-900/50", entry.isOverdue && "bg-red-950/20"]}>
+                  <td class="px-4 py-3 align-top">
+                    <PriorityBadge priority={entry.assessment.priority} score={entry.assessment.score} />
+                  </td>
+                  <td class="px-4 py-3 align-top">
+                    <a href={`/items/${entry.vulnerability.id}`} class="font-medium text-slate-100 hover:underline">
+                      {entry.vulnerability.identifier}
+                    </a>
+                    <div class="mt-0.5 font-mono text-xs text-slate-500">
+                      CVSS {entry.vulnerability.cvss.toFixed(1)}
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 align-top">
+                    <a href={`/assets/${entry.asset.id}`} class="text-slate-300 hover:underline">
+                      {entry.asset.name}
+                    </a>
+                    <div class="mt-0.5 text-xs text-slate-500">
+                      {entry.asset.component} {entry.asset.version}
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 align-top text-xs text-slate-400">
+                    <div>
+                      CVSS {entry.assessment.factors.cvss.toFixed(1)} × ekspozycja{" "}
+                      {entry.assessment.factors.exposureWeight} × krytyczność{" "}
+                      {entry.assessment.factors.criticalityWeight}
+                    </div>
+                    <div class="mt-0.5 text-slate-500">
+                      {EXPOSURE_LABEL[entry.asset.exposure]}, krytyczność {CRITICALITY_LABEL[entry.asset.criticality]}
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 align-top">
+                    {entry.deadline === null ? (
+                      <span class="text-xs text-slate-500">bez terminu</span>
+                    ) : (
+                      <>
+                        <div class="text-xs text-slate-300">{dateFormat.format(new Date(entry.deadline))}</div>
+                        {entry.isOverdue && (
+                          <div class="mt-0.5 text-xs font-medium text-red-300">
+                            po terminie od {entry.daysOverdue} {entry.daysOverdue === 1 ? "dnia" : "dni"}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    )
+  }
+</AppShell>

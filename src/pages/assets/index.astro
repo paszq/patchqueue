@@ -1,0 +1,118 @@
+---
+import AppShell from "@/components/app/AppShell.astro";
+import { createClient } from "@/lib/supabase";
+import { listAssets } from "@/lib/services/patchqueue";
+import { CRITICALITY_LABEL, EXPOSURE_LABEL, type Asset } from "@/types";
+
+export const prerender = false;
+
+const db = createClient(Astro.request.headers, Astro.cookies);
+let assets: Asset[] = [];
+let error: string | null = Astro.url.searchParams.get("error");
+
+if (db) {
+  try {
+    assets = await listAssets(db);
+  } catch (cause) {
+    error = cause instanceof Error ? cause.message : "Nie udało się wczytać zasobów";
+  }
+}
+
+const field =
+  "w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-slate-400 focus:outline-none";
+const label = "mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400";
+---
+
+<AppShell title="Zasoby" error={error}>
+  <div class="grid gap-8 lg:grid-cols-[1fr_20rem]">
+    <section>
+      {
+        assets.length === 0 ? (
+          <div class="rounded-lg border border-dashed border-slate-700 bg-slate-900/40 px-6 py-10 text-center text-sm text-slate-400">
+            Nie masz jeszcze żadnych zasobów. Dodaj pierwszy formularzem obok — to od jego ekspozycji i krytyczności
+            zależy, jak wysoko trafią jego podatności.
+          </div>
+        ) : (
+          <div class="overflow-x-auto rounded-lg border border-slate-800">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-900/80 text-xs tracking-wide text-slate-400 uppercase">
+                <tr>
+                  <th scope="col" class="px-4 py-3 font-medium">
+                    Nazwa
+                  </th>
+                  <th scope="col" class="px-4 py-3 font-medium">
+                    Komponent
+                  </th>
+                  <th scope="col" class="px-4 py-3 font-medium">
+                    Ekspozycja
+                  </th>
+                  <th scope="col" class="px-4 py-3 font-medium">
+                    Krytyczność
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800">
+                {assets.map((asset) => (
+                  <tr class="hover:bg-slate-900/50">
+                    <td class="px-4 py-3">
+                      <a href={`/assets/${asset.id}`} class="font-medium text-slate-100 hover:underline">
+                        {asset.name}
+                      </a>
+                    </td>
+                    <td class="px-4 py-3 text-slate-400">
+                      {asset.component} {asset.version}
+                    </td>
+                    <td class="px-4 py-3 text-slate-400">{EXPOSURE_LABEL[asset.exposure]}</td>
+                    <td class="px-4 py-3 text-slate-400">{CRITICALITY_LABEL[asset.criticality]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      }
+    </section>
+
+    <aside class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+      <h2 class="mb-4 text-sm font-semibold text-slate-200">Nowy zasób</h2>
+      <form method="POST" action="/api/assets" class="space-y-4">
+        <div>
+          <label class:list={label} for="name">Nazwa</label>
+          <input class:list={field} id="name" name="name" required maxlength="200" placeholder="srv-web-01" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class:list={label} for="component">Komponent</label>
+            <input class:list={field} id="component" name="component" required maxlength="200" placeholder="nginx" />
+          </div>
+          <div>
+            <label class:list={label} for="version">Wersja</label>
+            <input class:list={field} id="version" name="version" required maxlength="100" placeholder="1.18.0" />
+          </div>
+        </div>
+        <div>
+          <label class:list={label} for="exposure">Ekspozycja</label>
+          <select class:list={field} id="exposure" name="exposure" required>
+            <option value="public">osiągalny z sieci publicznej</option>
+            <option value="internal">tylko z sieci wewnętrznej</option>
+            <option value="isolated">odcięty</option>
+          </select>
+        </div>
+        <div>
+          <label class:list={label} for="criticality">Krytyczność</label>
+          <select class:list={field} id="criticality" name="criticality" required>
+            <option value="high">wysoka</option>
+            <option value="medium">średnia</option>
+            <option value="low">niska</option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          class="w-full rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-white"
+        >
+          Dodaj zasób
+        </button>
+      </form>
+    </aside>
+  </div>
+</AppShell>

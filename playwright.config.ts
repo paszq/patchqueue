@@ -4,7 +4,10 @@ const PORT = 4321;
 
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  // Testy dzielą jeden serwer deweloperski i jeden projekt bazy. Równoległość dawała
+  // zatory na kompilacji stron w locie, a nie realny zysk przy czterech scenariuszach.
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
