@@ -1,0 +1,49 @@
+import type { APIRoute } from "astro";
+import { z } from "zod";
+import { backTo, firstIssue, isResponse, messageOf, requireSession } from "@/lib/api";
+import { deleteAsset, updateAsset } from "@/lib/services/patchqueue";
+
+export const prerender = false;
+
+const updateSchema = z.object({
+  _action: z.literal("update"),
+  name: z.string().trim().min(1, "Nazwa zasobu jest wymagana").max(200),
+  component: z.string().trim().min(1, "Komponent jest wymagany").max(200),
+  version: z.string().trim().min(1, "Wersja jest wymagana").max(100),
+  exposure: z.enum(["public", "internal", "isolated"], { message: "Wybierz poziom ekspozycji" }),
+  criticality: z.enum(["high", "medium", "low"], { message: "Wybierz krytyczność" }),
+});
+
+const deleteSchema = z.object({ _action: z.literal("delete") });
+
+export const POST: APIRoute = async (context) => {
+  const session = requireSession(context);
+  if (isResponse(session)) return session;
+
+  const id = context.params.id ?? "";
+  const payload = Object.fromEntries(await context.request.formData());
+
+  if (deleteSchema.safeParse(payload).success) {
+    try {
+      await deleteAsset(session.db, id);
+      return backTo(context, "/assets");
+    } catch (error) {
+      // Odmowa z wyzwalacza w bazie niesie listę pozycji blokujących usunięcie.
+      return backTo(context, `/assets/${id}`, messageOf(error));
+    }
+  }
+
+  const parsed = updateSchema.safeParse(payload);
+  if (!parsed.success) {
+    return backTo(context, `/assets/${id}`, firstIssue(parsed.error.issues));
+  }
+
+  try {
+    const { _action, ...input } = parsed.data;
+    void _action;
+    await updateAsset(session.db, id, input);
+    return backTo(context, `/assets/${id}`);
+  } catch (error) {
+    return backTo(context, `/assets/${id}`, messageOf(error));
+  }
+};

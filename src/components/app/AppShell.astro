@@ -1,0 +1,70 @@
+---
+import Layout from "@/layouts/Layout.astro";
+
+interface Props {
+  title: string;
+  error?: string | null;
+}
+
+const { title, error = null } = Astro.props;
+const { user } = Astro.locals;
+const path = Astro.url.pathname;
+
+const links = [
+  { href: "/queue", label: "Kolejka" },
+  { href: "/assets", label: "Zasoby" },
+];
+---
+
+<Layout title={`${title} — PatchQueue`}>
+  <div class="min-h-screen bg-slate-950 text-slate-100">
+    <header class="border-b border-slate-800 bg-slate-900/60">
+      <div class="mx-auto flex max-w-5xl items-center justify-between gap-6 px-4 py-3">
+        <div class="flex items-center gap-6">
+          <a href="/queue" class="text-sm font-semibold tracking-tight text-slate-100">PatchQueue</a>
+          <nav class="flex gap-1" aria-label="Główna nawigacja">
+            {
+              links.map((link) => (
+                <a
+                  href={link.href}
+                  aria-current={path.startsWith(link.href) ? "page" : undefined}
+                  class:list={[
+                    "rounded px-3 py-1.5 text-sm transition-colors",
+                    path.startsWith(link.href)
+                      ? "bg-slate-800 text-white"
+                      : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-200",
+                  ]}
+                >
+                  {link.label}
+                </a>
+              ))
+            }
+          </nav>
+        </div>
+        <div class="flex items-center gap-3 text-sm text-slate-400">
+          <span>{user?.email}</span>
+          <form method="POST" action="/api/auth/signout">
+            <button
+              type="submit"
+              class="rounded px-2 py-1 text-slate-400 underline-offset-2 hover:text-slate-200 hover:underline"
+            >
+              Wyloguj
+            </button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-5xl px-4 py-8">
+      <h1 class="mb-6 text-2xl font-semibold tracking-tight">{title}</h1>
+      {
+        error && (
+          <div role="alert" class="mb-6 rounded-lg border border-red-800 bg-red-950/60 px-4 py-3 text-sm text-red-200">
+            {error}
+          </div>
+        )
+      }
+      <slot />
+    </main>
+  </div>
+</Layout>

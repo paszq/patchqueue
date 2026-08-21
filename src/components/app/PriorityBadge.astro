@@ -1,0 +1,25 @@
+---
+import { PRIORITY_LABEL } from "@/types";
+import type { PriorityClass } from "@/lib/domain/priority";
+
+interface Props {
+  priority: PriorityClass;
+  score: number;
+}
+
+const { priority, score } = Astro.props;
+
+const styles: Record<PriorityClass, string> = {
+  critical: "border-red-700 bg-red-950 text-red-200",
+  high: "border-orange-700 bg-orange-950 text-orange-200",
+  medium: "border-amber-700 bg-amber-950 text-amber-200",
+  low: "border-slate-700 bg-slate-900 text-slate-400",
+};
+---
+
+<span
+  class:list={["inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-xs font-medium", styles[priority]]}
+>
+  {PRIORITY_LABEL[priority]}
+  <span class="font-mono opacity-70">{score.toFixed(2)}</span>
+</span>

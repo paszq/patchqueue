@@ -1,0 +1,263 @@
+---
+import AppShell from "@/components/app/AppShell.astro";
+import PriorityBadge from "@/components/app/PriorityBadge.astro";
+import { createClient } from "@/lib/supabase";
+import { getVulnerabilityWithAsset, listDecisions } from "@/lib/services/patchqueue";
+import { CRITICALITY_LABEL, EXPOSURE_LABEL, type Decision, type QueueEntry } from "@/types";
+
+export const prerender = false;
+
+const db = createClient(Astro.request.headers, Astro.cookies);
+const id = Astro.params.id ?? "";
+let entry: QueueEntry | null = null;
+let decisions: Decision[] = [];
+let error: string | null = Astro.url.searchParams.get("error");
+
+if (db) {
+  try {
+    entry = await getVulnerabilityWithAsset(db, id);
+    decisions = await listDecisions(db, id);
+  } catch (cause) {
+    error = cause instanceof Error ? cause.message : "Nie udało się wczytać pozycji";
+  }
+}
+
+const field =
+  "w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-slate-400 focus:outline-none";
+const label = "mb-1 block text-xs font-medium uppercase tracking-wide text-slate-400";
+const dateTime = new Intl.DateTimeFormat("pl-PL", { dateStyle: "medium", timeStyle: "short" });
+const dateOnly = new Intl.DateTimeFormat("pl-PL", { dateStyle: "medium" });
+const decisionLabel = { patched: "załatane", rejected: "odrzucone", reopened: "przywrócone do kolejki" } as const;
+const isOpen = entry?.vulnerability.status === "open";
+---
+
+<AppShell title={entry ? entry.vulnerability.identifier : "Pozycja"} error={error}>
+  {
+    entry === null ? (
+      <p class="text-slate-400">
+        Nie znaleziono pozycji.{" "}
+        <a href="/queue" class="underline">
+          Wróć do kolejki
+        </a>
+        .
+      </p>
+    ) : (
+      <div class="grid gap-8 lg:grid-cols-[1fr_20rem]">
+        <section class="space-y-8">
+          <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+            <div class="mb-4 flex flex-wrap items-center gap-3">
+              <PriorityBadge priority={entry.assessment.priority} score={entry.assessment.score} />
+              {entry.isOverdue && (
+                <span class="rounded border border-red-800 bg-red-950 px-2 py-0.5 text-xs font-medium text-red-200">
+                  po terminie od {entry.daysOverdue} {entry.daysOverdue === 1 ? "dnia" : "dni"}
+                </span>
+              )}
+              {!isOpen && (
+                <span class="rounded border border-slate-700 bg-slate-900 px-2 py-0.5 text-xs text-slate-400">
+                  {entry.vulnerability.status === "patched" ? "załatana" : "odrzucona"}
+                </span>
+              )}
+            </div>
+
+            <h2 class="mb-3 text-sm font-semibold text-slate-200">Skąd ten priorytet</h2>
+            <table class="w-full text-left text-sm">
+              <tbody class="divide-y divide-slate-800">
+                <tr>
+                  <td class="py-2 text-slate-400">Ocena CVSS podatności</td>
+                  <td class="py-2 text-right font-mono text-slate-200">{entry.assessment.factors.cvss.toFixed(1)}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 text-slate-400">Ekspozycja zasobu — {EXPOSURE_LABEL[entry.asset.exposure]}</td>
+                  <td class="py-2 text-right font-mono text-slate-200">× {entry.assessment.factors.exposureWeight}</td>
+                </tr>
+                <tr>
+                  <td class="py-2 text-slate-400">Krytyczność zasobu — {CRITICALITY_LABEL[entry.asset.criticality]}</td>
+                  <td class="py-2 text-right font-mono text-slate-200">
+                    × {entry.assessment.factors.criticalityWeight}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-2 font-medium text-slate-200">Wynik</td>
+                  <td class="py-2 text-right font-mono font-medium text-slate-100">
+                    {entry.assessment.score.toFixed(2)}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-2 text-slate-400">Termin działania</td>
+                  <td class="py-2 text-right text-slate-200">
+                    {entry.deadline === null ? "bez terminu" : dateOnly.format(new Date(entry.deadline))}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {entry.vulnerability.description !== "" && (
+            <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+              <h2 class="mb-2 text-sm font-semibold text-slate-200">Opis</h2>
+              <p class="text-sm whitespace-pre-wrap text-slate-300">{entry.vulnerability.description}</p>
+            </div>
+          )}
+
+          <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+            <h2 class="mb-4 text-sm font-semibold text-slate-200">Historia rozstrzygnięć</h2>
+            {decisions.length === 0 ? (
+              <p class="text-sm text-slate-500">Pozycja nie została jeszcze rozstrzygnięta.</p>
+            ) : (
+              <ol class="space-y-3">
+                {decisions.map((decision) => (
+                  <li class="border-l-2 border-slate-700 pl-4">
+                    <div class="text-sm text-slate-200">{decisionLabel[decision.kind]}</div>
+                    <div class="text-xs text-slate-500">{dateTime.format(new Date(decision.createdAt))}</div>
+                    {decision.reason !== null && decision.reason !== "" && (
+                      <p class="mt-1 text-sm text-slate-400">{decision.reason}</p>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        </section>
+
+        <aside class="space-y-6">
+          {isOpen ? (
+            <>
+              <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+                <h2 class="mb-4 text-sm font-semibold text-slate-200">Rozstrzygnij</h2>
+                <form method="POST" action="/api/decisions" class="mb-5">
+                  <input type="hidden" name="vulnerabilityId" value={entry.vulnerability.id} />
+                  <input type="hidden" name="kind" value="patched" />
+                  <button
+                    type="submit"
+                    class="w-full rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-white"
+                  >
+                    Oznacz jako załataną
+                  </button>
+                </form>
+
+                <form method="POST" action="/api/decisions" class="space-y-3">
+                  <input type="hidden" name="vulnerabilityId" value={entry.vulnerability.id} />
+                  <input type="hidden" name="kind" value="rejected" />
+                  <div>
+                    <label class:list={label} for="reason">
+                      Powód odrzucenia
+                    </label>
+                    <textarea
+                      class:list={field}
+                      id="reason"
+                      name="reason"
+                      rows="3"
+                      required
+                      maxlength="2000"
+                      placeholder="np. komponent nieużywany w tej konfiguracji"
+                    />
+                    <p class="mt-1 text-xs text-slate-500">
+                      Bez powodu odrzucenie nie przejdzie — pilnuje tego również baza.
+                    </p>
+                  </div>
+                  <button
+                    type="submit"
+                    class="w-full rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800"
+                  >
+                    Odrzuć
+                  </button>
+                </form>
+              </div>
+
+              <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+                <h2 class="mb-4 text-sm font-semibold text-slate-200">Popraw dane</h2>
+                <form method="POST" action={`/api/vulnerabilities/${entry.vulnerability.id}`} class="space-y-4">
+                  <input type="hidden" name="_action" value="update" />
+                  <div>
+                    <label class:list={label} for="edit-identifier">
+                      Identyfikator
+                    </label>
+                    <input
+                      class:list={field}
+                      id="edit-identifier"
+                      name="identifier"
+                      required
+                      maxlength="100"
+                      value={entry.vulnerability.identifier}
+                    />
+                  </div>
+                  <div>
+                    <label class:list={label} for="edit-cvss">
+                      Ocena CVSS
+                    </label>
+                    <input
+                      class:list={field}
+                      id="edit-cvss"
+                      name="cvss"
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="10"
+                      required
+                      value={entry.vulnerability.cvss}
+                    />
+                  </div>
+                  <div>
+                    <label class:list={label} for="edit-description">
+                      Opis
+                    </label>
+                    <textarea class:list={field} id="edit-description" name="description" rows="3" maxlength="5000">
+                      {entry.vulnerability.description}
+                    </textarea>
+                  </div>
+                  <button
+                    type="submit"
+                    class="w-full rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800"
+                  >
+                    Zapisz
+                  </button>
+                </form>
+              </div>
+            </>
+          ) : (
+            <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+              <h2 class="mb-2 text-sm font-semibold text-slate-200">Przywróć do kolejki</h2>
+              <p class="mb-4 text-xs text-slate-500">
+                Poprzednie rozstrzygnięcie zostaje w historii — przywrócenie dopisuje kolejny wpis, nie kasuje starego.
+              </p>
+              <form method="POST" action="/api/decisions">
+                <input type="hidden" name="vulnerabilityId" value={entry.vulnerability.id} />
+                <input type="hidden" name="kind" value="reopened" />
+                <button
+                  type="submit"
+                  class="w-full rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-white"
+                >
+                  Przywróć do kolejki
+                </button>
+              </form>
+            </div>
+          )}
+
+          <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+            <h2 class="mb-2 text-sm font-semibold text-slate-200">Zasób</h2>
+            <a href={`/assets/${entry.asset.id}`} class="text-sm text-slate-200 hover:underline">
+              {entry.asset.name}
+            </a>
+            <p class="mt-1 text-xs text-slate-500">
+              {entry.asset.component} {entry.asset.version}
+            </p>
+          </div>
+
+          <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+            <h2 class="mb-2 text-sm font-semibold text-slate-200">Usuń pozycję</h2>
+            <p class="mb-4 text-xs text-slate-500">Do wpisów dodanych omyłkowo.</p>
+            <form method="POST" action={`/api/vulnerabilities/${entry.vulnerability.id}`}>
+              <input type="hidden" name="_action" value="delete" />
+              <button
+                type="submit"
+                class="w-full rounded-md border border-red-800 px-4 py-2 text-sm font-medium text-red-300 transition-colors hover:bg-red-950"
+              >
+                Usuń
+              </button>
+            </form>
+          </div>
+        </aside>
+      </div>
+    )
+  }
+</AppShell>
