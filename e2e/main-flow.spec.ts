@@ -334,4 +334,35 @@ test.describe("główny przepływ", () => {
     await expect(alert).toContainText("CVE-2026-3333");
     await expect(page.getByRole("link", { name: "CVE-2026-3333" })).toBeVisible();
   });
+
+  /**
+   * Historia ma odpowiadać nie tylko na pytanie „co się stało", ale i „dlaczego".
+   * Przy odrzuceniu powód jest wymuszony; przy załataniu dowód jest możliwy do
+   * wpisania i tak samo trwały — trafia do tej samej, niezmienialnej historii.
+   */
+  test("dowód załatania trafia do historii i zostaje tam po przywróceniu", async ({ page }) => {
+    await signUp(page);
+
+    await addAsset(page, {
+      name: "srv-proof-01",
+      component: "nginx",
+      version: "1.18.0",
+      exposure: "public",
+      criticality: "high",
+    });
+    await addVulnerability(page, "CVE-2026-4444", "8.8");
+
+    await page.locator("#evidence").fill("aktualizacja do nginx 1.24.0, wdrożenie #482");
+    await page.getByRole("button", { name: "Oznacz jako załataną" }).click();
+
+    await expect(page.getByText("załatane")).toBeVisible();
+    await expect(page.getByText("Dowód:")).toBeVisible();
+    await expect(page.getByText("aktualizacja do nginx 1.24.0, wdrożenie #482")).toBeVisible();
+
+    // Przywrócenie dopisuje wpis; dowód poprzedniego rozstrzygnięcia zostaje.
+    await page.getByRole("button", { name: "Przywróć do kolejki" }).click();
+    await expect(page.getByText("przywrócone do kolejki")).toBeVisible();
+    await expect(page.getByText("aktualizacja do nginx 1.24.0, wdrożenie #482")).toBeVisible();
+  });
+
 });
