@@ -1,18 +1,18 @@
 ---
 import AppShell from "@/components/app/AppShell.astro";
 import { createClient } from "@/lib/supabase";
-import { listAssets } from "@/lib/services/patchqueue";
-import { CRITICALITY_LABEL, EXPOSURE_LABEL, type Asset } from "@/types";
+import { listAssetsWithOpenItems } from "@/lib/services/patchqueue";
+import { CRITICALITY_LABEL, EXPOSURE_LABEL, type AssetSummary } from "@/types";
 
 export const prerender = false;
 
 const db = createClient(Astro.request.headers, Astro.cookies);
-let assets: Asset[] = [];
+let assets: AssetSummary[] = [];
 let error: string | null = Astro.url.searchParams.get("error");
 
 if (db) {
   try {
-    assets = await listAssets(db);
+    assets = await listAssetsWithOpenItems(db);
   } catch (cause) {
     error = cause instanceof Error ? cause.message : "Nie udało się wczytać zasobów";
   }
@@ -49,6 +49,9 @@ const label = "mb-1 block text-xs font-medium uppercase tracking-wide text-slate
                   <th scope="col" class="px-4 py-3 font-medium">
                     Krytyczność
                   </th>
+                  <th scope="col" class="px-4 py-3 text-right font-medium">
+                    Otwarte pozycje
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-800">
@@ -64,6 +67,15 @@ const label = "mb-1 block text-xs font-medium uppercase tracking-wide text-slate
                     </td>
                     <td class="px-4 py-3 text-slate-400">{EXPOSURE_LABEL[asset.exposure]}</td>
                     <td class="px-4 py-3 text-slate-400">{CRITICALITY_LABEL[asset.criticality]}</td>
+                    <td class="px-4 py-3 text-right" data-testid={`open-items-${asset.id}`}>
+                      {asset.openItems === 0 ? (
+                        <span class="font-mono text-slate-600">0</span>
+                      ) : (
+                        <span class="rounded border border-slate-700 bg-slate-900 px-2 py-0.5 font-mono text-slate-100">
+                          {asset.openItems}
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

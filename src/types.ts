@@ -22,6 +22,11 @@ export interface Asset {
   updatedAt: string;
 }
 
+/** Zasób wraz z liczbą nierozstrzygniętych pozycji — kształt listy zasobów. */
+export interface AssetSummary extends Asset {
+  openItems: number;
+}
+
 export interface Vulnerability {
   id: string;
   assetId: string;
