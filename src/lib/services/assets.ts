@@ -2,7 +2,7 @@
  * Operacje na zasobach.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Asset } from "@/types";
+import type { Asset, AssetSummary } from "@/types";
 import { ASSET_COLUMNS, DataAccessError, must, toAsset, type AssetRow } from "./rows";
 
 export async function listAssets(db: SupabaseClient): Promise<Asset[]> {
@@ -12,6 +12,30 @@ export async function listAssets(db: SupabaseClient): Promise<Asset[]> {
     .order("name");
   if (error !== null) throw new DataAccessError(error.message);
   return (data ?? []).map(toAsset);
+}
+
+/**
+ * Zasoby wraz z liczbą otwartych pozycji.
+ *
+ * Licznik idzie osobnym zapytaniem, a nie złączeniem z agregatem, bo złączenie
+ * wewnętrzne gubiłoby zasoby bez ani jednej otwartej pozycji — a to właśnie one mają
+ * na liście pokazać zero. Dwa zapytania na całą listę, nie jedno na zasób.
+ */
+export async function listAssetsWithOpenItems(db: SupabaseClient): Promise<AssetSummary[]> {
+  const assets = await listAssets(db);
+
+  const { data, error }: { data: { asset_id: string }[] | null; error: { message: string } | null } = await db
+    .from("vulnerabilities")
+    .select("asset_id")
+    .eq("status", "open");
+  if (error !== null) throw new DataAccessError(error.message);
+
+  const openPerAsset = new Map<string, number>();
+  for (const row of data ?? []) {
+    openPerAsset.set(row.asset_id, (openPerAsset.get(row.asset_id) ?? 0) + 1);
+  }
+
+  return assets.map((asset) => ({ ...asset, openItems: openPerAsset.get(asset.id) ?? 0 }));
 }
 
 export async function getAsset(db: SupabaseClient, id: string): Promise<Asset> {

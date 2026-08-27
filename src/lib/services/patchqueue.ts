@@ -11,7 +11,7 @@
  */
 export { DataAccessError } from "./rows";
 export type { AssetInput } from "./assets";
-export { createAsset, deleteAsset, getAsset, listAssets, updateAsset } from "./assets";
+export { createAsset, deleteAsset, getAsset, listAssets, listAssetsWithOpenItems, updateAsset } from "./assets";
 export type { VulnerabilityInput } from "./vulnerabilities";
 export {
   createVulnerability,

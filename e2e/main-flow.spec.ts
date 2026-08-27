@@ -448,4 +448,41 @@ test.describe("główny przepływ", () => {
     await expect(page.getByText("aktualizacja do nginx 1.24.0, wdrożenie #482")).toBeVisible();
   });
 
+  test("lista zasobów pokazuje, ile pozycji jest otwartych", async ({ page }) => {
+    await signUp(page);
+
+    await addAsset(page, {
+      name: "srv-licznik-01",
+      component: "nginx",
+      version: "1.18.0",
+      exposure: "public",
+      criticality: "high",
+    });
+    await addVulnerability(page, "CVE-2026-5551", "9.1");
+    await page.goto("/assets");
+    await page.getByRole("link", { name: "srv-licznik-01" }).click();
+    await addVulnerability(page, "CVE-2026-5552", "6.4");
+
+    // Zasób bez pozycji ma pokazać zero, a nie puste miejsce.
+    await addAsset(page, {
+      name: "srv-licznik-02",
+      component: "openssl",
+      version: "3.0.2",
+      exposure: "isolated",
+      criticality: "low",
+    });
+
+    await page.goto("/assets");
+    const licznik = (nazwa: string) => page.locator("tbody tr", { hasText: nazwa }).locator("td").last();
+    await expect(licznik("srv-licznik-01")).toHaveText("2");
+    await expect(licznik("srv-licznik-02")).toHaveText("0");
+
+    // Rozstrzygnięcie zdejmuje pozycję z licznika — liczą się otwarte, nie wszystkie.
+    await page.goto("/queue");
+    await page.getByRole("link", { name: "CVE-2026-5552" }).click();
+    await page.getByRole("button", { name: "Oznacz jako załataną" }).click();
+
+    await page.goto("/assets");
+    await expect(licznik("srv-licznik-01")).toHaveText("1");
+  });
 });
