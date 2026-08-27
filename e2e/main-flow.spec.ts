@@ -198,6 +198,89 @@ test.describe("wczytywanie z zewnętrznego źródła", () => {
     await expect(page.getByRole("link", { name: "CVE-2026-7002" })).toHaveCount(1);
   });
 
+  test("załączony plik CSV tworzy pozycje tak samo jak wklejona treść", async ({ page }) => {
+    await signUp(page);
+
+    await addAsset(page, {
+      name: "srv-upload-01",
+      component: "nginx",
+      version: "1.18.0",
+      exposure: "public",
+      criticality: "high",
+    });
+    await addAsset(page, {
+      name: "srv-upload-02",
+      component: "openssl",
+      version: "3.0.2",
+      exposure: "internal",
+      criticality: "medium",
+    });
+
+    const csv = [
+      "CVE,Component,Version,CVSS,Description",
+      "CVE-2026-7101,nginx,1.18.0,9.1,zdalne wykonanie kodu",
+      "CVE-2026-7102,openssl,3.0.2,7.4,błąd weryfikacji certyfikatu",
+    ].join("\n");
+
+    await page.goto("/import");
+    await page.locator("#file").setInputFiles({
+      name: "raport-skanera.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from(csv, "utf-8"),
+    });
+    await page.getByRole("button", { name: "Wczytaj" }).click();
+
+    const summary = page.getByTestId("import-summary");
+    await expect(summary).toContainText("raport skanera (CSV)");
+    await expect(summary).toContainText("Dodano 2");
+
+    // Obie pozycje trafiły do zasobów o zgodnym komponencie, każda do swojego.
+    await page.goto("/queue");
+    await expect(page.getByRole("link", { name: "CVE-2026-7101" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "srv-upload-01" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "CVE-2026-7102" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "srv-upload-02" })).toBeVisible();
+  });
+
+  /**
+   * Plik i pole tekstowe prowadzą do tej samej ścieżki, więc gdy wypełnione są oba,
+   * musi być jasne, które wygrywa — inaczej użytkownik wczytuje co innego, niż widzi.
+   */
+  test("załącznik ma pierwszeństwo przed wklejoną treścią", async ({ page }) => {
+    await signUp(page);
+    await addAsset(page, {
+      name: "srv-upload-03",
+      component: "postfix",
+      version: "3.6",
+      exposure: "public",
+      criticality: "high",
+    });
+
+    await page.goto("/import");
+    await page.locator("#raw").fill(["CVE,Component,CVSS", "CVE-2026-7103,postfix,5.5"].join("\n"));
+    await page.locator("#file").setInputFiles({
+      name: "raport-skanera.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from(["CVE,Component,CVSS", "CVE-2026-7104,postfix,8.8"].join("\n"), "utf-8"),
+    });
+    await page.getByRole("button", { name: "Wczytaj" }).click();
+
+    await expect(page.getByTestId("import-summary")).toContainText("Dodano 1");
+
+    await page.goto("/queue");
+    await expect(page.getByRole("link", { name: "CVE-2026-7104" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "CVE-2026-7103" })).toHaveCount(0);
+  });
+
+  test("bez pliku i bez treści wczytywanie mówi, czego brakuje", async ({ page }) => {
+    await signUp(page);
+
+    await page.goto("/import");
+    await page.getByRole("button", { name: "Wczytaj" }).click();
+
+    await expect(page.getByRole("alert")).toContainText("Załącz plik albo wklej treść");
+  });
+
   test("znalezisko bez pasującego zasobu nie wchodzi po cichu", async ({ page }) => {
     await signUp(page);
     await addAsset(page, {

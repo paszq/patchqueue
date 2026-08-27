@@ -8,16 +8,45 @@ import { importFindings } from "@/lib/services/import";
 export const prerender = false;
 
 const schema = z.object({
-  raw: z.string().trim().min(1, "Wklej treść do wczytania"),
+  raw: z.string().trim().min(1, "Załącz plik albo wklej treść do wczytania"),
   format: z.union([z.enum(SOURCE_FORMATS), z.literal("auto")]).default("auto"),
   fallbackAssetId: z.string().optional(),
 });
+
+/** Granica dla załącznika. Raport skanera w CSV mieści się w tym z dużym zapasem. */
+const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
+
+/** `FormData` zwraca też pliki — do pól tekstowych przepuszczamy wyłącznie łańcuchy. */
+function textField(form: FormData, name: string): string | undefined {
+  const value = form.get(name);
+  return typeof value === "string" && value !== "" ? value : undefined;
+}
 
 export const POST: APIRoute = async (context) => {
   const session = requireSession(context);
   if (isResponse(session)) return session;
 
-  const parsed = schema.safeParse(Object.fromEntries(await context.request.formData()));
+  const form = await context.request.formData();
+
+  // Załącznik i wklejona treść wchodzą tą samą ścieżką: plik jest tylko innym sposobem
+  // dostarczenia tekstu, a nie osobnym trybem wczytywania. Dzięki temu adaptery,
+  // dopasowanie do zasobów i podsumowanie działają identycznie w obu przypadkach.
+  const upload = form.get("file");
+  const file = upload instanceof File && upload.size > 0 ? upload : null;
+  if (file !== null && file.size > MAX_UPLOAD_BYTES) {
+    return backTo(
+      context,
+      "/import",
+      `Plik jest za duży — limit to ${(MAX_UPLOAD_BYTES / 1024 / 1024).toString()} MB.`,
+    );
+  }
+
+  const parsed = schema.safeParse({
+    // Gdy użytkownik zrobił obie rzeczy naraz, wygrywa plik — to on jest jawnym wyborem.
+    raw: file !== null ? await file.text() : (textField(form, "raw") ?? ""),
+    format: textField(form, "format") ?? "auto",
+    fallbackAssetId: textField(form, "fallbackAssetId"),
+  });
   if (!parsed.success) {
     return backTo(context, "/import", firstIssue(parsed.error.issues));
   }
