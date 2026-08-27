@@ -62,17 +62,32 @@ const label = "mb-1 block text-xs font-medium uppercase tracking-wide text-slate
   }
 
   <div class="grid gap-8 lg:grid-cols-[1fr_18rem]">
-    <form method="POST" action="/api/import" class="space-y-4" id="import-form">
+    <form method="POST" action="/api/import" enctype="multipart/form-data" class="space-y-4" id="import-form">
       <div>
-        <label class:list={label} for="raw">Treść źródła</label>
+        <label class:list={label} for="file">Załącz plik</label>
+        <input
+          class:list={`${field} file:mr-3 file:rounded file:border-0 file:bg-slate-700 file:px-3 file:py-1 file:text-sm file:text-slate-100`}
+          id="file"
+          name="file"
+          type="file"
+          accept=".csv,.tsv,.txt,text/csv,text/plain"
+        />
+        <p class="mt-1 text-xs text-slate-500">
+          Raport skanera w CSV — oczekiwane kolumny opisane obok. Pozycje utworzą się same i trafią do zasobów o zgodnym
+          komponencie.
+        </p>
+      </div>
+
+      <div>
+        <label class:list={label} for="raw">…albo wklej treść</label>
         <textarea
           class:list={`${field} font-mono`}
           id="raw"
           name="raw"
-          rows="14"
-          required
+          rows="12"
           placeholder="CVE,Component,Version,CVSS
 CVE-2026-1111,nginx,1.18.0,9.8"></textarea>
+        <p class="mt-1 text-xs text-slate-500">Gdy załączysz plik, wklejona treść jest pomijana.</p>
       </div>
       <button
         type="submit"
@@ -89,6 +104,45 @@ CVE-2026-1111,nginx,1.18.0,9.8"></textarea>
           <option value="auto">rozpoznaj automatycznie</option>
           {SOURCE_FORMATS.map((f) => <option value={f}>{SOURCE_LABEL[f]}</option>)}
         </select>
+      </div>
+
+      <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
+        <h2 class="mb-2 text-sm font-semibold text-slate-200">Oczekiwane kolumny</h2>
+        <p class="mb-3 text-xs text-slate-500">
+          Pierwszy wiersz to nagłówek. Rozdzielenie przecinkiem albo średnikiem. Kolejność dowolna, nadmiarowe kolumny
+          są pomijane.
+        </p>
+        <dl class="space-y-2 text-xs">
+          <div>
+            <dt class="font-mono text-slate-200">CVE</dt>
+            <dd class="text-slate-500">
+              identyfikator — jedyna kolumna wymagana. Także: <code>id</code>, <code>identyfikator</code>
+            </dd>
+          </div>
+          <div>
+            <dt class="font-mono text-slate-200">CVSS</dt>
+            <dd class="text-slate-500">
+              ocena 0–10. Także: <code>score</code>, <code>ocena</code>. Bez niej pozycja wchodzi z zerem i czeka na
+              uzupełnienie
+            </dd>
+          </div>
+          <div>
+            <dt class="font-mono text-slate-200">Component</dt>
+            <dd class="text-slate-500">
+              po nim idzie dopasowanie do zasobu. Także: <code>package</code>, <code>komponent</code>, <code
+                >produkt</code
+              >
+            </dd>
+          </div>
+          <div>
+            <dt class="font-mono text-slate-200">Version</dt>
+            <dd class="text-slate-500">wersja komponentu. Także: <code>wersja</code></dd>
+          </div>
+          <div>
+            <dt class="font-mono text-slate-200">Description</dt>
+            <dd class="text-slate-500">opis. Także: <code>summary</code>, <code>title</code>, <code>opis</code></dd>
+          </div>
+        </dl>
       </div>
 
       <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-5">
