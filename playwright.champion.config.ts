@@ -12,7 +12,7 @@ if (existsSync(".env")) {
  */
 export default defineConfig({
   testDir: "./scripts/screenshots",
-  testMatch: "capture.spec.ts",
+  testMatch: "champion.spec.ts",
   fullyParallel: false,
   workers: 1,
   reporter: "list",
@@ -21,7 +21,7 @@ export default defineConfig({
     // nadpisywalo viewport i deviceScaleFactor ponizej, wiec zrzuty wychodzily
     // w 1280 px bez skalowania, mimo ze konfiguracja mowila co innego.
     ...devices["Desktop Chrome"],
-    baseURL: process.env.BASE_URL ?? "https://patchqueue.paszekkrystian-19.workers.dev",
+    baseURL: "https://github.com",
     viewport: { width: 1440, height: 900 },
     deviceScaleFactor: 2,
   },
