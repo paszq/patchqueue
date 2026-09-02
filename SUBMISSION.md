@@ -56,6 +56,16 @@ Commit: `131bed5`.
 **Priorytet nie jest przechowywany.** Wynika z reguły i liczy się przy odczycie —
 inaczej istniałby w dwóch miejscach i mógłby się rozjechać przy zmianie wag.
 
+**Ślad decyzji kompletny w obie strony** — FR-015 wymaga, by zamknięta pozycja pokazywała
+rozstrzygnięcie _wraz z uzasadnieniem_. Przy odrzuceniu powód był wymuszony od początku;
+przy załataniu nie istniało pole, w które dałoby się cokolwiek wpisać, więc dla połowy
+rozstrzygnięć uzasadnienia nigdy nie było co pokazać. Formularz ma teraz **dowód
+załatania**, trafiający do tej samej niezmienialnej historii, a historia podpisuje wpis
+zależnie od rodzaju — Dowód, Powód, Uzasadnienie. Dowód pozostaje nieobowiązkowy:
+przymus przy odrzuceniu jest zapisaną regułą domenową, przy załataniu nie ma go w PRD i
+nie został dopisany bez decyzji produktowej.
+Commit: `7432130`.
+
 **Izolacja kont wymuszana przez bazę, nie przez kod aplikacji** — polityki dostępu na
 poziomie wierszy w `supabase/migrations/20260820150000_initial_schema.sql`. Zapytanie bez
 właściwego użytkownika nie zwraca cudzych danych niezależnie od tego, co zrobi warstwa
