@@ -117,6 +117,7 @@ BASE_URL=https://patchqueue.paszekkrystian-19.workers.dev npx playwright test   
 | `context/foundation/tech-stack.md`           | wybór stacku i przyjęte ryzyka                                    |
 | `context/foundation/shape-notes.md`          | dlaczego produkt wygląda tak, a nie inaczej                       |
 | `context/foundation/test-plan.md`            | mapa ryzyka, przekroje wdrożenia testów, kucharka                 |
+| `context/foundation/fr-audit.md`             | audyt FR-001…FR-017 względem kodu i testów                        |
 | `context/map/repo-map.md`                    | mapa repozytorium z jawnym zasięgiem pomiaru                      |
 | `context/domain/01-domain-distillation.md`   | pojęcia, subdomeny, niezmienniki                                  |
 | `context/domain/03-anti-corruption-layer.md` | plan odcięcia od dostawcy (niewykonany, świadomie)                |
