@@ -1,6 +1,6 @@
 # Punkt wznowienia — PatchQueue
 
-Ostatnia aktualizacja: 2026-09-02
+Ostatnia aktualizacja: 2026-09-02 (wieczór)
 
 ## Gdzie to wszystko jest
 
@@ -14,9 +14,9 @@ Ostatnia aktualizacja: 2026-09-02
 
 ## Stan na dziś
 
-Wszystkie trzy bloki certyfikacji domknięte, dokumentacja zgłoszenia napisana.
-33 commity, 78 testów jednostkowych i integracyjnych, 14 przeglądowych, pipeline
-zielony, produkcja aktualna i sprawdzona testami przeciw żywej instancji.
+Wszystkie trzy bloki certyfikacji domknięte wraz z dowodami wymaganymi przez formularze.
+52 commity, 83 testy jednostkowe i integracyjne, 16 przeglądowych, pipeline zielony,
+agent przeglądający PR-y uruchomiony i sprawdzony na prawdziwym PR, produkcja aktualna.
 
 | Blok         | Co go broni                                                                                                                                  |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -26,12 +26,24 @@ zielony, produkcja aktualna i sprawdzona testami przeciw żywej instancji.
 
 ## Co zostało do zrobienia
 
-1. **Wysłanie formularza zgłoszeniowego.** Termin: **14 września 2026**.
-   `SUBMISSION.md` jest gotowy i aktualny — treść zgłoszenia leży w nim, po sekcji
-   na blok, z odnośnikami do plików i commitów. Nic poza samą wysyłką nie zostało.
-2. Opcjonalnie: agent przeglądający pull requesty — workflow leży gotowy w
-   `.github/workflows/impl-review.yml`, wymaga sekretu `ANTHROPIC_API_KEY`
-   (osobna płatność za użycie, niezależna od subskrypcji).
+**Zostało wyłącznie wysłanie dwóch formularzy.** Termin: **14 września 2026**.
+Obie wysyłki muszą pójść w tym samym terminie — dosłać później się nie da.
+
+| Formularz            | Adres                                                               | Co załączyć                                                         |
+| -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Builder              | https://baserow.io/form/g6rJ-njiGpV5lPxvot6iRxsXTh8Wb-AnRjy7s2Zck1c | link do repozytorium, zrzuty z `docs/screenshots/`                  |
+| Architect + Champion | https://baserow.io/form/fwnBioduXc90QTli6lsCVL_YgRdTECPTCmwiVhu8d-E | `RAPORT-ARCHITEKTONICZNY.md`, zrzuty z `docs/screenshots/champion/` |
+
+Treść merytoryczna zgłoszenia leży w `SUBMISSION.md`, po sekcji na blok.
+
+### Znane, świadomie niedomknięte
+
+Trzeci przebieg agenta przeglądającego uruchamia się, kosztuje 1,35 USD i kończy
+wszystkimi krokami na zielono, **nie publikując raportu ani komentarza**. Sprawdzone
+ponowieniem: powtarzalne. Skutek: krok „Check review verdict" odczytuje poprzedni plik
+przeglądu, znajduje `APPROVED` i wystawia zielony status dla kodu, którego nikt nie
+przejrzał. Diagnostyka wymaga włączenia `show_full_output` i kosztuje po 1,35 USD za
+próbę, więc zatrzymana — opisane w `SUBMISSION.md` jako siódmy przypadek wzorca.
 
 ## Poprawki interfejsu z 2 września 2026
 
@@ -109,5 +121,7 @@ BASE_URL=https://patchqueue.paszekkrystian-19.workers.dev npx playwright test   
 | `context/domain/01-domain-distillation.md`   | pojęcia, subdomeny, niezmienniki                                  |
 | `context/domain/03-anti-corruption-layer.md` | plan odcięcia od dostawcy (niewykonany, świadomie)                |
 | `SUBMISSION.md`                              | treść zgłoszenia — sekcja na blok, odnośniki do plików i commitów |
+| `RAPORT-ARCHITEKTONICZNY.md`                 | raport bloku Architect, składa cztery artefakty modułu 4          |
+| `context/changes/import-flow/research.md`    | research wybranej funkcji (artefakt L3)                           |
 | `context/changes/*/`                         | po jednym folderze na zmianę, z uzasadnieniami                    |
 | `CLAUDE.md`                                  | komendy, konwencje, reguły domenowe dla agenta                    |
