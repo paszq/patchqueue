@@ -5,12 +5,12 @@ podatność stoi, a nie tylko jak groźna jest sama w sobie. Ta sama podatność
 wystawionym do internetu i na maszynie odciętej od sieci dostaje inny priorytet i inny
 termin. To odróżnia produkt od arkusza posortowanego po ocenie CVSS.
 
-|                      |                                                                                          |
-| -------------------- | ---------------------------------------------------------------------------------------- |
-| Aplikacja            | https://patchqueue.paszekkrystian-19.workers.dev                                         |
-| Repozytorium         | https://github.com/paszq/patchqueue                                                      |
-| Konto demonstracyjne | `demo@example.com` / `Demo12345!`                                                        |
-| Stan                 | 33 commity, 78 testów jednostkowych i integracyjnych, 14 przeglądowych, pipeline zielony |
+|                      |                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Aplikacja            | https://patchqueue.paszekkrystian-19.workers.dev                                                                       |
+| Repozytorium         | https://github.com/paszq/patchqueue                                                                                    |
+| Konto demonstracyjne | `demo@example.com` / `Demo12345!`                                                                                      |
+| Stan                 | 52 commity, 83 testy jednostkowe i integracyjne, 16 przeglądowych, pipeline zielony wraz z agentem przeglądającym PR-y |
 
 ### Ścieżka do przeklikania (2 minuty)
 
@@ -31,10 +31,13 @@ termin. To odróżnia produkt od arkusza posortowanego po ocenie CVSS.
    zasób i zmień jego ekspozycję: priorytety otwartych pozycji przeliczają się,
    rozstrzygnięte zostają nietknięte, a licznik spada dopiero po rozstrzygnięciu.
 8. Spróbuj usunąć zasób z otwartymi pozycjami. Odmowa wymienia blokujące pozycje z nazwy.
-9. **Wczytywanie** → załącz plik CSV z raportem skanera albo wklej jego treść. Znaleziska
-   dopasowują się do zasobów po komponencie, powtórne wczytanie tego samego pliku niczego
-   nie dubluje, a znalezisko bez pasującego zasobu jest raportowane jako pominięte, nie
-   wchodzi po cichu.
+9. Spróbuj dopisać podatność o identyfikatorze, który już jest na tym zasobie. Odmowa
+   nazywa przyczynę i wskazuje przywrócenie jako właściwą drogę. Regułę egzekwuje baza,
+   więc obowiązuje też przy zapisie z pominięciem aplikacji.
+10. **Wczytywanie** → załącz plik CSV z raportem skanera albo wklej jego treść. Znaleziska
+    dopasowują się do zasobów po komponencie, powtórne wczytanie tego samego pliku niczego
+    nie dubluje, a znalezisko bez pasującego zasobu jest raportowane jako pominięte, nie
+    wchodzi po cichu.
 
 ---
 
@@ -136,6 +139,22 @@ sprzężenie z jednym dostawcą jako zaakceptowane ryzyko, więc nie ma tu rozja
 intencja-vs-kod, jest dług, którego koszt został wyceniony.
 Commity: `eaadb90`, `0bab983`.
 
+**Raport architektoniczny** — `RAPORT-ARCHITEKTONICZNY.md`, dowód dla tego bloku. Składa
+cztery artefakty w jedną odpowiedź na pytanie, gdzie mieszka wiedza o produkcie. Wątek
+przewodni, w który wszystkie cztery badania trafiły niezależnie: **reguła dotycząca pozycji
+zostaje zapisana tam, gdzie po raz pierwszy była potrzebna, a nie tam, gdzie pozycja jest
+definiowana.** Trzy potwierdzone wystąpienia, dwa naprawione, jedno otwarte i opisane.
+Commit: `6f5adef`.
+
+**Research wybranej funkcji** — `context/changes/import-flow/research.md`, artefakt L3.
+Ścieżka wczytywania jest jedyną funkcją przechodzącą przez wszystkie warstwy naraz.
+Najmocniejsze ustalenie nie pochodzi z analizy, tylko z danych produkcyjnych: pięć pozycji
+`CVE-2026-252` na koncie demonstracyjnym **nie mogło wejść przez wczytywanie**, bo wzorzec
+walidujący wymaga w numerze czterech do siedmiu cyfr, a ten ma trzy. Wszedł formularzem,
+który nie sprawdza kształtu w ogóle. Te same pięć wierszy ujawniło wcześniej brak reguły
+o duplikatach — jedne dane, dwie niezależne luki, obie po tej samej stronie.
+Commit: `5ff34c3`.
+
 **Destylacja domeny** — `context/domain/01-domain-distillation.md`. Czternaście pojęć
 z dokumentów i kodu, przypisanie subdomen (Core / Supporting / Generic), trzech
 kandydatów na agregaty z niezmiennikami i statusem egzekwowania każdego. Najciekawszy
@@ -177,17 +196,44 @@ BASE_URL=https://patchqueue.paszekkrystian-19.workers.dev npx playwright test
 **Strażnik przed cichym pomijaniem testów** (`7f9e7ad`) — opisany w następnej sekcji,
 bo to on wykrył najpoważniejszą z pięciu usterek pomiaru.
 
-**Agent przeglądający pull requesty** — `.github/workflows/impl-review.yml` leży gotowy:
-odkrywa plan zmiany, sprawdza dryf implementacji względem planu, commituje raport na
-gałąź i publikuje status `impl-review-ci/verdict`. Nie jest włączony — wymaga sekretu
-`ANTHROPIC_API_KEY`, płatnego niezależnie od subskrypcji.
+**Agent przeglądający pull requesty — uruchomiony i działający.** PR #1 przeszedł trzy
+przebiegi przeglądu na modelu Sonnet 5: agent czyta plan zmiany, porównuje z nim
+implementację, publikuje komentarz zbiorczy z werdyktem i komentarze inline zakotwiczone
+na zmienionych liniach, commituje raport na gałąź i wystawia status
+`impl-review-ci/verdict`.
+
+Nie był to przegląd na pokaz. Agent znalazł **dwa realne ustalenia, których autor nie
+zauważył**, oba tej samej klasy — plan deklarował pokrycie, którego nie było:
+
+| Przebieg | Ustalenie                                                                                                                                        | Reakcja                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| 1        | `translate()` obsługuje zapis **i** aktualizację, kontrakt planu to deklarował, testy jechały wyłącznie wstawianiem                              | test integracyjny na ścieżkę edycji (`6b43be4`)     |
+| 2        | Luka na poziomie bazy zamknięta, ale tłumaczenie komunikatu przy edycji nadal nietestowane — test uderzał w bazę z pominięciem warstwy aplikacji | test przeglądowy przez formularz edycji (`cc2d582`) |
+
+Drugie ustalenie jest istotniejsze niż pierwsze: agent **zawęził** swój własny zarzut po
+poprawce, zamiast uznać sprawę za zamkniętą albo powtórzyć to samo zdanie. To jest różnica
+między przeglądem, który czyta kod, a takim, który generuje uprzejmy komentarz.
+
+Zgłoszenie w poprzedniej wersji mówiło, że ten workflow „leży gotowy, wymaga tylko sekretu".
+**To było nieprawdą i warto wiedzieć, o ile.** Pierwsze prawdziwe uruchomienie ujawniło
+cztery niezależne braki, jeden po drugim: sekret `ANTHROPIC_API_KEY`, uprawnienie
+`id-token: write` w bloku `permissions` (`c6b02c1`), aplikację GitHub „Claude"
+zainstalowaną w repozytorium oraz klucz API związany z przestrzenią roboczą, a nie
+z tożsamością. Żaden nie był widoczny wcześniej, bo plik istniał i wyglądał kompletnie.
+
+**Znalezisko o samej bramce weryfikującej.** Trzeci przebieg uruchamia agenta, kosztuje
+1,35 USD, kończy się **wszystkimi krokami na zielono** — i nie publikuje ani raportu, ani
+komentarza. Sprawdzone przez ponowienie: zachowanie powtarzalne. Skutek jest gorszy niż
+sama awaria: krok „Check review verdict" odczytuje **poprzedni** plik przeglądu, znajduje
+w nim `APPROVED` i wystawia zielony status dla kodu, którego nikt nie przejrzał. Bramka
+nie odróżnia „przegląd wypadł dobrze" od „przeglądu nie było".
 
 ---
 
-## Wątek przekrojowy: pięć razy zielony wynik znaczył „nie sprawdziłem"
+## Wątek przekrojowy: siedem razy zielony wynik znaczył „nie sprawdziłem"
 
 To najmocniejsza rzecz, jaką ten projekt pokazał, i jedyny powód, dla którego opisuję ją
-osobno zamiast rozdzielić między bloki. Pięć razy zestaw był zielony i pięć razy zieleń
+osobno zamiast rozdzielić między bloki. Siedem razy zestaw był zielony i siedem razy zieleń
 nie znaczyła „jest dobrze", tylko „nie sprawdziłem". Za każdym razem wykrycie polegało na
 zadaniu pytania **co dokładnie zostało sprawdzone**, zamiast **czy jest zielono**.
 
@@ -224,8 +270,23 @@ zanim naprawa w ogóle powstała. Rozwiązanie w
 `tests/integration/atomic-decisions.test.ts:61-71` — funkcja `expectDomainRejection`
 odróżnia jedno od drugiego i zawodzi z wyraźnym komunikatem, gdy funkcji brakuje.
 
+**6. Konfiguracja zrzutów nadpisywała samą siebie.** Rozwinięcie profilu urządzenia stało
+po `viewport` i `deviceScaleFactor`, więc je kasowało — obrazki wychodziły w 1280 px zamiast
+zadanych 1440 i bez skalowania. Plik trafił na `main` **bez uruchomienia kontroli typów**,
+więc bramka była czerwona, a nikt tego nie zauważył. Wykryte dopiero przy następnym pełnym
+przebiegu bramek. Naprawa: `3cb8623`.
+
+**7. Bramka przeglądu świeci na zielono bez przeglądu.** Opisane w bloku Champion powyżej:
+gdy agent nie opublikuje raportu, krok weryfikujący werdykt odczytuje **poprzedni** plik,
+znajduje w nim `APPROVED` i wystawia zielony status. Jedyny z siedmiu przypadków, który
+dotyczy samego mechanizmu weryfikacji, a nie tego, co on weryfikuje.
+
 Wspólny mianownik: **narzędzie, które nic nie znalazło, i narzędzie, które nie
 patrzyło, dają identyczny wynik na ekranie.** Rozróżnia je dopiero pytanie o zasięg.
+
+Przypadki 6 i 7 powstały **przy domykaniu tego zgłoszenia**, czyli w trakcie opisywania
+pięciu poprzednich. To nie jest ozdobna klamra, tylko wynik: wzorzec nie jest historią
+zamkniętą, tylko czymś, co wraca za każdym razem, gdy przestaje się pytać o zasięg.
 
 ---
 
@@ -277,6 +338,8 @@ Uzasadnienie: `context/changes/atomic-decisions/change.md`, naprawa: `bf9e5af`.
 | `context/foundation/tech-stack.md`           | wybór stacku i przyjęte ryzyka                     |
 | `context/foundation/shape-notes.md`          | dlaczego produkt wygląda tak, a nie inaczej        |
 | `context/foundation/test-plan.md`            | mapa ryzyka i kucharka testów                      |
+| `RAPORT-ARCHITEKTONICZNY.md`                 | raport bloku Architect, składa cztery artefakty    |
+| `docs/screenshots/`                          | zrzuty aplikacji i pipeline'u do formularzy        |
 | `context/map/repo-map.md`                    | mapa repozytorium z jawnym zasięgiem pomiaru       |
 | `context/domain/01-domain-distillation.md`   | pojęcia, subdomeny, niezmienniki                   |
 | `context/domain/03-anti-corruption-layer.md` | plan odcięcia od dostawcy (niewykonany, świadomie) |
