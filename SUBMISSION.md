@@ -338,6 +338,7 @@ Uzasadnienie: `context/changes/atomic-decisions/change.md`, naprawa: `bf9e5af`.
 | `context/foundation/tech-stack.md`           | wybór stacku i przyjęte ryzyka                     |
 | `context/foundation/shape-notes.md`          | dlaczego produkt wygląda tak, a nie inaczej        |
 | `context/foundation/test-plan.md`            | mapa ryzyka i kucharka testów                      |
+| `context/foundation/fr-audit.md`             | audyt wszystkich wymagań względem kodu             |
 | `RAPORT-ARCHITEKTONICZNY.md`                 | raport bloku Architect, składa cztery artefakty    |
 | `docs/screenshots/`                          | zrzuty aplikacji i pipeline'u do formularzy        |
 | `context/map/repo-map.md`                    | mapa repozytorium z jawnym zasięgiem pomiaru       |
