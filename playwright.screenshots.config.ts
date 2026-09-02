@@ -16,9 +16,12 @@ export default defineConfig({
   workers: 1,
   reporter: "list",
   use: {
+    // Rozwiniecie profilu urzadzenia MUSI byc pierwsze. Postawione na koncu
+    // nadpisywalo viewport i deviceScaleFactor ponizej, wiec zrzuty wychodzily
+    // w 1280 px bez skalowania, mimo ze konfiguracja mowila co innego.
+    ...devices["Desktop Chrome"],
     baseURL: process.env.BASE_URL ?? "https://patchqueue.paszekkrystian-19.workers.dev",
     viewport: { width: 1440, height: 900 },
     deviceScaleFactor: 2,
-    ...devices["Desktop Chrome"],
   },
 });
