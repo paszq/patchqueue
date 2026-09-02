@@ -527,4 +527,41 @@ test.describe("główny przepływ", () => {
     await page.goto("/queue");
     await expect(page.getByRole("link", { name: "CVE-2026-6001" })).toHaveCount(1);
   });
+
+  /**
+   * Druga droga do tej samej kolizji: edycja identyfikatora istniejącej pozycji.
+   * Test integracyjny sprawdza, że baza odmawia, ale uderza w nią wprost — z
+   * pominięciem `updateVulnerability` i `translate()`. Tędy przechodzi cała ścieżka:
+   * formularz, punkt końcowy, warstwa danych i tłumaczenie odmowy na komunikat.
+   * Lukę wskazał agent przeglądający PR, po zamknięciu szerszej luki na poziomie bazy.
+   */
+  test("zmiana identyfikatora na kolidujący jest odrzucana z tym samym komunikatem", async ({ page }) => {
+    await signUp(page);
+
+    await addAsset(page, {
+      name: "srv-unik-02",
+      component: "postfix",
+      version: "3.6",
+      exposure: "public",
+      criticality: "high",
+    });
+    await addVulnerability(page, "CVE-2026-6101", "9.1");
+
+    await page.goto("/assets");
+    await page.getByRole("link", { name: "srv-unik-02" }).click();
+    await addVulnerability(page, "CVE-2026-6102", "7.5");
+
+    // Jesteśmy na pozycji 6102 — zmieniamy jej identyfikator na już zajęty.
+    await page.locator("#edit-identifier").fill("CVE-2026-6101");
+    await page.getByRole("button", { name: "Zapisz" }).click();
+
+    const alert = page.getByRole("alert");
+    await expect(alert).toContainText("CVE-2026-6101");
+    await expect(alert).toContainText("już zapisana na tym zasobie");
+
+    // Nic się nie zmieniło: obie pozycje istnieją pod swoimi identyfikatorami.
+    await page.goto("/queue");
+    await expect(page.getByRole("link", { name: "CVE-2026-6101" })).toHaveCount(1);
+    await expect(page.getByRole("link", { name: "CVE-2026-6102" })).toHaveCount(1);
+  });
 });
