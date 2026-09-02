@@ -137,6 +137,33 @@ suite("unikalność pozycji na zasobie", () => {
     expect(onOtherAsset.error, "ta sama podatność na innym zasobie musi przejść").toBeNull();
   });
 
+  /**
+   * Zmiana identyfikatora istniejącej pozycji to druga droga do tej samej kolizji.
+   * Plan zakładał, że reguła i jej tłumaczenie obowiązują przy zapisie ORAZ przy
+   * aktualizacji, ale testy jechały wyłącznie wstawianiem — lukę wskazał agent
+   * przeglądający PR, nie autor.
+   */
+  it("odrzuca zmianę identyfikatora na kolidujący z inną pozycją tego zasobu", async () => {
+    const first = await addItem(assetId, "CVE-2026-DUP-5");
+    expect(first.error).toBeNull();
+    const second = await addItem(assetId, "CVE-2026-DUP-6");
+    expect(second.error).toBeNull();
+    if (second.id === null) throw new Error("brak identyfikatora drugiej pozycji");
+
+    const { error } = await account.client
+      .from("vulnerabilities")
+      .update({ identifier: "CVE-2026-DUP-5" })
+      .eq("id", second.id);
+    expectUniqueness(error);
+
+    // Kolizja przy zmianie wielkości liter musi być odrzucona tak samo.
+    const { error: caseError } = await account.client
+      .from("vulnerabilities")
+      .update({ identifier: "cve-2026-dup-5" })
+      .eq("id", second.id);
+    expectUniqueness(caseError);
+  });
+
   it("odrzuca duplikat także wtedy, gdy istniejąca pozycja jest już rozstrzygnięta", async () => {
     const first = await addItem(assetId, "CVE-2026-DUP-4");
     expect(first.error).toBeNull();
