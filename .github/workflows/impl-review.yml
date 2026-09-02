@@ -139,6 +139,9 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # TYMCZASOWO: bez tego akcja ukrywa tresc bledu i widac wylacznie
+          # is_error:true. Do usuniecia zaraz po zdiagnozowaniu.
+          show_full_output: true
           # Tool allowlist and turn limit go through claude_args in v1 —
           # there are no longer top-level `allowed_tools` / `max_turns` inputs.
           # Include `mcp__github_inline_comment__create_inline_comment` so the
