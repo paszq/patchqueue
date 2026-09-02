@@ -5,6 +5,25 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Vulnerability } from "@/types";
 import { DataAccessError, must, toVulnerability, VULNERABILITY_COLUMNS, type VulnerabilityRow } from "./rows";
 
+/** Kod naruszenia unikalności w Postgresie. */
+const UNIQUE_VIOLATION = "23505";
+
+/**
+ * Odmowa unikalności przychodzi z bazy jako komunikat sterownika, nazywający indeks.
+ * Tłumaczymy ją na zdanie w języku produktu — tak samo, jak `deleteAsset` przepuszcza
+ * dalej treść odmowy wyzwalacza. Reguła zostaje w bazie; tutaj zmienia się wyłącznie
+ * to, co zobaczy człowiek.
+ */
+function translate(error: { message: string; code?: string }, identifier: string): DataAccessError {
+  if (error.code === UNIQUE_VIOLATION) {
+    return new DataAccessError(
+      `Podatność ${identifier} jest już zapisana na tym zasobie. ` +
+        "Jeśli została wcześniej rozstrzygnięta, przywróć ją do kolejki — historia rozstrzygnięć zostanie zachowana.",
+    );
+  }
+  return new DataAccessError(error.message);
+}
+
 export interface VulnerabilityInput {
   assetId: string;
   identifier: string;
@@ -17,7 +36,7 @@ export async function createVulnerability(
   userId: string,
   input: VulnerabilityInput,
 ): Promise<Vulnerability> {
-  const { data, error }: { data: VulnerabilityRow | null; error: { message: string } | null } = await db
+  const { data, error }: { data: VulnerabilityRow | null; error: { message: string; code?: string } | null } = await db
     .from("vulnerabilities")
     .insert({
       user_id: userId,
@@ -28,7 +47,7 @@ export async function createVulnerability(
     })
     .select(VULNERABILITY_COLUMNS)
     .single();
-  if (error !== null) throw new DataAccessError(error.message);
+  if (error !== null) throw translate(error, input.identifier);
   return toVulnerability(must(data, "utworzona podatność"));
 }
 
@@ -37,13 +56,13 @@ export async function updateVulnerability(
   id: string,
   input: Omit<VulnerabilityInput, "assetId">,
 ): Promise<Vulnerability> {
-  const { data, error }: { data: VulnerabilityRow | null; error: { message: string } | null } = await db
+  const { data, error }: { data: VulnerabilityRow | null; error: { message: string; code?: string } | null } = await db
     .from("vulnerabilities")
     .update({ identifier: input.identifier, cvss: input.cvss, description: input.description })
     .eq("id", id)
     .select(VULNERABILITY_COLUMNS)
     .maybeSingle();
-  if (error !== null) throw new DataAccessError(error.message);
+  if (error !== null) throw translate(error, input.identifier);
   return toVulnerability(must(data, "zmieniona podatność"));
 }
 
