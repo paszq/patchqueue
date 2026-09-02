@@ -1,7 +1,7 @@
 ---
 change_id: duplicate-items
 title: Ta sama podatność nie może stać dwa razy na tym samym zasobie
-status: in-progress
+status: impl_reviewed
 created: 2026-09-02
 updated: 2026-09-02
 archived_at: null
