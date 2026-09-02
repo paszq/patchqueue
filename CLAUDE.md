@@ -15,6 +15,8 @@ Read before planning any change:
 - `context/foundation/roadmap.md` — vertical slices, dependency order, current position
 - `context/foundation/tech-stack.md` — stack decision and accepted risks
 - `context/foundation/shape-notes.md` — why the product is shaped this way
+- `context/foundation/test-plan.md` — risk map, rollout phases, and the cookbook for
+  adding tests. Read before writing any test: the risk it addresses must be named in §2.
 
 Per-change work lives in `context/changes/<change-id>/`. Use the roadmap's Change ID.
 

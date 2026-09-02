@@ -80,7 +80,8 @@ Commit: `9eafa9c`, uzasadnienie: `context/changes/account-isolation/change.md`.
 | Odrzucenie bez powodu jest niemożliwe             | Ograniczenie `decisions_rejection_needs_reason`                                                                                                                                                                         |
 | Zasobu z otwartymi pozycjami nie da się usunąć    | Wyzwalacz `refuse_asset_delete_with_open_items` — świadomie wyzwalacz, nie klucz obcy `ON DELETE RESTRICT`, bo klucz blokowałby usunięcie także wtedy, gdy wszystkie pozycje są rozstrzygnięte, a reguła mówi co innego |
 
-**Dokumenty kontekstowe:** `prd.md` (wymagania, historyjki, guardraile), `roadmap.md`
+**Dokumenty kontekstowe:** `prd.md` (wymagania, historyjki, guardraile), `test-plan.md`
+(mapa ryzyka i przypisanie testów do nazwanych ryzyk), `roadmap.md`
 (dziewięć pionowych przekrojów), `tech-stack.md` (wybór stacku i przyjęte ryzyka),
 `shape-notes.md` (dlaczego produkt wygląda tak, a nie inaczej). Wszystkie w
 `context/foundation/`. Reguły dla agenta: `CLAUDE.md`.
@@ -275,6 +276,7 @@ Uzasadnienie: `context/changes/atomic-decisions/change.md`, naprawa: `bf9e5af`.
 | `context/foundation/roadmap.md`              | przekroje i ich stan                               |
 | `context/foundation/tech-stack.md`           | wybór stacku i przyjęte ryzyka                     |
 | `context/foundation/shape-notes.md`          | dlaczego produkt wygląda tak, a nie inaczej        |
+| `context/foundation/test-plan.md`            | mapa ryzyka i kucharka testów                      |
 | `context/map/repo-map.md`                    | mapa repozytorium z jawnym zasięgiem pomiaru       |
 | `context/domain/01-domain-distillation.md`   | pojęcia, subdomeny, niezmienniki                   |
 | `context/domain/03-anti-corruption-layer.md` | plan odcięcia od dostawcy (niewykonany, świadomie) |
