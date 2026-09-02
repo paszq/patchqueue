@@ -55,6 +55,11 @@ jobs:
       # Required for POSTing the "impl-review-ci/verdict" commit status
       # to the bot's SHA from the "Check review verdict" step.
       statuses: write
+      # Required by claude-code-action@v1, which exchanges a GitHub OIDC token
+      # before it runs. Without it the action fails before Claude starts, with
+      # "Could not fetch an OIDC token" - and the job's other steps still pass,
+      # so the run looks half-green while no review happened at all.
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
