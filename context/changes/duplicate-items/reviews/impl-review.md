@@ -4,7 +4,7 @@
 - **Plan**: `context/changes/duplicate-items/plan.md`
 - **Scope**: Full plan (CI review on PR #1)
 - **Date**: 2026-09-02
-- **CI run**: https://github.com/paszq/patchqueue/actions/runs/33666624841
+- **CI run**: https://github.com/paszq/patchqueue/actions/runs/33672256570
 - **Verdict**: APPROVED
 - **Findings**: 0 critical, 1 warning, 2 observations
 
@@ -22,14 +22,14 @@
 
 ## Findings
 
-### F1 — Update path that triggers the same collision has no test coverage
+### F1 — Update-path collision is now proven at the DB level, but the friendly-message translation on that same path is still unverified
 
 - **Severity**: ⚠️ WARNING
 - **Impact**: 🏃 LOW — quick decision, fix is obvious and narrowly scoped
 - **Dimension**: Test Coverage
-- **Location**: `src/lib/services/vulnerabilities.ts:17-25,54-67`
-- **Detail**: `translate()` (L17-25) is shared by both `createVulnerability` and `updateVulnerability` (L54-67), and the plan's Phase 2 contract explicitly says the normalization/translation applies "do zapisu i aktualizacji" (create and update). `tests/integration/duplicate-items.test.ts` only drives the rule through inserts; `e2e/main-flow.spec.ts` only exercises "add, then add duplicate." Neither exercises editing an existing item's identifier into a collision with a sibling item on the same asset, so the update branch of `translate()` — including whether its "przywróć ją do kolejki" wording still reads correctly for an edit-collision rather than a create-collision — is unverified.
-- **Fix**: Add one integration case in `tests/integration/duplicate-items.test.ts` that updates an item's identifier to collide with another item on the same asset and asserts the same `expectUniqueness`-style rejection through the update path.
+- **Location**: `src/lib/services/vulnerabilities.ts:65` (also `tests/integration/duplicate-items.test.ts:146-165`, `src/pages/items/[id].astro:192-205`)
+- **Detail**: A prior run of this review flagged that `translate()` (shared by `createVulnerability` and `updateVulnerability`, and named explicitly by the plan's Phase 2 contract — "dotyczy zapisu i aktualizacji") had no test driving it through the update path. Commit 6b43be4 responded by adding `odrzuca zmianę identyfikatora na kolidujący z inną pozycją tego zasobu` to `duplicate-items.test.ts`. That test proves the DB unique index rejects an `UPDATE` that collides with a sibling row — a real gap worth closing, and now closed — but it goes through the raw Supabase client directly against the `vulnerabilities` table (mirroring this file's own documented scope: "Czego te testy NIE dowodzą: że warstwa aplikacji ładnie tłumaczy odmowę"). It never calls `updateVulnerability`, so `translate()`'s branch inside the `updateVulnerability` catch path (L65) still has no test exercising it. This path is reachable by a real user: `src/pages/items/[id].astro:192-205` renders an `#edit-identifier` field that posts `_action=update` to `/api/vulnerabilities/{id}`, i.e. editing an existing item's identifier into a collision is a normal UI action, not a hypothetical. Neither `main-flow.spec.ts` (still only exercises the create-form duplicate case, added in commit 19273eb) nor any unit/integration test confirms the user sees the same "już zapisana na tym zasobie... przywróć ją do kolejki" message when the collision is triggered by an edit rather than a new entry.
+- **Fix**: Add one e2e case (or a service-level test against `updateVulnerability` directly) that edits an existing item's identifier to collide with a sibling item on the same asset and asserts the same friendly `role="alert"` message the create-path test already checks in `main-flow.spec.ts:495-529`.
 - **Decision**: PENDING
 
 ### F2 — Integration/E2E/db-push verification commands could not be executed in this CI review environment
@@ -38,7 +38,7 @@
 - **Impact**: 🏃 LOW — no code change; environment/process note
 - **Dimension**: Success Criteria
 - **Location**: N/A (review environment)
-- **Detail**: This review environment has no `SUPABASE_URL`/`SUPABASE_KEY` and no Playwright browser binaries, so `npx supabase db push`, the integration suites under `tests/integration/` (including the new `duplicate-items.test.ts`), and `npx playwright test` could not run here — the integration test files fail closed with "Brak SUPABASE_URL / SUPABASE_KEY w pipelinie" rather than being skipped, identically for the two pre-existing integration files and the new one, so this is an environment gap, not a regression from this diff. `npm run lint`, `npm run typecheck`, and `npm run build` all pass (62/62 unit tests also pass). Per CLAUDE.md, the repo's own CI workflow (`.github/workflows/ci.yml`) currently runs only lint + build, and wiring up test execution is tracked separately as F-03 `verification-pipeline` — this review's inability to independently re-run the integration/E2E suites is consistent with that known gap. The author's `change.md` records a local run with real Supabase infra (3 failures before the migration, 4/4 green after, 82 unit/integration + 15 review tests green) — this review could not independently confirm that claim.
+- **Detail**: Unchanged from the prior review of this PR. This environment has no `SUPABASE_URL`/`SUPABASE_KEY` and no Playwright browser binaries, so `npx supabase db push`, the integration suites under `tests/integration/` (including `duplicate-items.test.ts`), and `npx playwright test` still fail closed here with "Brak SUPABASE_URL / SUPABASE_KEY w pipelinie" rather than being skipped — identically across all three integration files, so this is an environment gap, not a regression from the new commit. `npm run lint`, `npm run typecheck`, and `npm run build` all pass; 62/62 unit tests pass. Per CLAUDE.md, wiring test execution into CI is tracked separately as F-03 `verification-pipeline`.
 - **Fix**: Provision `SUPABASE_URL`/`SUPABASE_KEY` (and Playwright browsers) for the environment this review skill runs in, once F-03 `verification-pipeline` wires test execution into CI.
 - **Decision**: PENDING
 
@@ -48,8 +48,8 @@
 - **Impact**: 🏃 LOW — no code change needed; already a deliberate, documented scope boundary
 - **Dimension**: Safety & Quality
 - **Location**: `src/lib/services/import.ts:115`
-- **Detail**: The new migration's own comment justifies itself partly by closing the race between two concurrent imports of the same report — a case the app-level `seen` set in `importFindings` cannot catch. If that race actually fires, `importFindings` still throws `new DataAccessError(error.message)` (L115), a raw Postgres message naming the index, surfaced to the user via `messageOf(error)` in the import endpoint — not the friendly, product-language translation added to `createVulnerability`/`updateVulnerability` in this PR. The plan explicitly excludes touching `importFindings` ("Nie ruszamy importFindings"), so this is a knowingly accepted gap, not an oversight, but it means the stated goal ("the user sees a message naming the cause, not a DB error") is left unmet for the one call site the migration's own rationale calls out as the reason for existing at the DB layer.
-- **Fix**: If this race is judged worth handling, translate `23505` in `importFindings`'s catch path the same way `vulnerabilities.ts` does; otherwise, no action needed — this is acceptable as scoped.
+- **Detail**: Unchanged from the prior review. `importFindings` still throws a raw `DataAccessError(error.message)` on a `23505` collision instead of the product-language translation `vulnerabilities.ts` now has. The plan explicitly excludes touching `importFindings` ("Nie ruszamy importFindings"), and commit 6b43be4's own message records the author consciously keeping this out of scope rather than missing it. No action expected.
+- **Fix**: No action needed — accepted as scoped. If ever revisited, translate `23505` in `importFindings`'s catch path the same way `vulnerabilities.ts` does.
 - **Decision**: PENDING
 
 <!-- End of report -->
