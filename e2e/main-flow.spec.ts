@@ -485,4 +485,83 @@ test.describe("główny przepływ", () => {
     await page.goto("/assets");
     await expect(licznik("srv-licznik-01")).toHaveText("1");
   });
+
+  /**
+   * Regula unikalnosci mieszka w bazie i jest sprawdzana testem integracyjnym.
+   * Tutaj chodzi o cos innego: czy uzytkownik dostaje zdanie, ktore rozumie, i czy
+   * kolejka nie zyskuje drugiego wiersza. Duplikat wchodzil wczesniej bez sladu -
+   * na koncie demonstracyjnym zebralo sie tak piec kopii tej samej podatnosci.
+   */
+  test("dopisanie istniejącej podatności jest odrzucane z czytelnym komunikatem", async ({ page }) => {
+    await signUp(page);
+
+    await addAsset(page, {
+      name: "srv-unik-01",
+      component: "nginx",
+      version: "1.18.0",
+      exposure: "public",
+      criticality: "high",
+    });
+    await addVulnerability(page, "CVE-2026-6001", "9.1");
+
+    // Ta sama podatność jeszcze raz na tym samym zasobie.
+    await page.goto("/assets");
+    await page.getByRole("link", { name: "srv-unik-01" }).click();
+    await page.locator("#identifier").fill("CVE-2026-6001");
+    await page.locator("#cvss").fill("9.1");
+    await page.getByRole("button", { name: "Dopisz i wylicz priorytet" }).click();
+
+    const alert = page.getByRole("alert");
+    await expect(alert).toContainText("CVE-2026-6001");
+    await expect(alert).toContainText("już zapisana na tym zasobie");
+    await expect(alert).toContainText("przywróć ją do kolejki");
+
+    // Zmiana wielkości liter nie jest obejściem — formularz normalizuje identyfikator
+    // tak samo, jak robi to wczytywanie z zewnętrznego źródła.
+    await page.locator("#identifier").fill("cve-2026-6001");
+    await page.locator("#cvss").fill("9.1");
+    await page.getByRole("button", { name: "Dopisz i wylicz priorytet" }).click();
+    await expect(page.getByRole("alert")).toContainText("już zapisana na tym zasobie");
+
+    // Kolejka ma dokładnie jeden wiersz z tym identyfikatorem.
+    await page.goto("/queue");
+    await expect(page.getByRole("link", { name: "CVE-2026-6001" })).toHaveCount(1);
+  });
+
+  /**
+   * Druga droga do tej samej kolizji: edycja identyfikatora istniejącej pozycji.
+   * Test integracyjny sprawdza, że baza odmawia, ale uderza w nią wprost — z
+   * pominięciem `updateVulnerability` i `translate()`. Tędy przechodzi cała ścieżka:
+   * formularz, punkt końcowy, warstwa danych i tłumaczenie odmowy na komunikat.
+   * Lukę wskazał agent przeglądający PR, po zamknięciu szerszej luki na poziomie bazy.
+   */
+  test("zmiana identyfikatora na kolidujący jest odrzucana z tym samym komunikatem", async ({ page }) => {
+    await signUp(page);
+
+    await addAsset(page, {
+      name: "srv-unik-02",
+      component: "postfix",
+      version: "3.6",
+      exposure: "public",
+      criticality: "high",
+    });
+    await addVulnerability(page, "CVE-2026-6101", "9.1");
+
+    await page.goto("/assets");
+    await page.getByRole("link", { name: "srv-unik-02" }).click();
+    await addVulnerability(page, "CVE-2026-6102", "7.5");
+
+    // Jesteśmy na pozycji 6102 — zmieniamy jej identyfikator na już zajęty.
+    await page.locator("#edit-identifier").fill("CVE-2026-6101");
+    await page.getByRole("button", { name: "Zapisz" }).click();
+
+    const alert = page.getByRole("alert");
+    await expect(alert).toContainText("CVE-2026-6101");
+    await expect(alert).toContainText("już zapisana na tym zasobie");
+
+    // Nic się nie zmieniło: obie pozycje istnieją pod swoimi identyfikatorami.
+    await page.goto("/queue");
+    await expect(page.getByRole("link", { name: "CVE-2026-6101" })).toHaveCount(1);
+    await expect(page.getByRole("link", { name: "CVE-2026-6102" })).toHaveCount(1);
+  });
 });

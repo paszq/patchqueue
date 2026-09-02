@@ -7,7 +7,14 @@ export const prerender = false;
 
 const updateSchema = z.object({
   _action: z.literal("update"),
-  identifier: z.string().trim().min(1, "Identyfikator podatności jest wymagany").max(100),
+  // Wielkie litery, bo tak samo normalizuje identyfikator ścieżka wczytywania.
+  // Bez tego regułę unikalności w bazie dałoby się obejść zmianą wielkości liter.
+  identifier: z
+    .string()
+    .trim()
+    .min(1, "Identyfikator podatności jest wymagany")
+    .max(100)
+    .transform((value) => value.toUpperCase()),
   cvss: z.coerce
     .number({ message: "Ocena CVSS musi być liczbą" })
     .min(0, "Ocena CVSS nie może być ujemna")
