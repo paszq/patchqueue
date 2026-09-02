@@ -5,12 +5,12 @@ podatność stoi, a nie tylko jak groźna jest sama w sobie. Ta sama podatność
 wystawionym do internetu i na maszynie odciętej od sieci dostaje inny priorytet i inny
 termin. To odróżnia produkt od arkusza posortowanego po ocenie CVSS.
 
-|                      |                                                                                           |
-| -------------------- | ----------------------------------------------------------------------------------------- |
-| Aplikacja            | https://patchqueue.paszekkrystian-19.workers.dev                                          |
-| Repozytorium         | https://github.com/paszq/patchqueue                                                       |
-| Konto demonstracyjne | `demo@example.com` / `Demo12345!`                                                         |
-| Stan                 | 28 commitów, 78 testów jednostkowych i integracyjnych, 14 przeglądowych, pipeline zielony |
+|                      |                                                                                          |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Aplikacja            | https://patchqueue.paszekkrystian-19.workers.dev                                         |
+| Repozytorium         | https://github.com/paszq/patchqueue                                                      |
+| Konto demonstracyjne | `demo@example.com` / `Demo12345!`                                                        |
+| Stan                 | 33 commity, 78 testów jednostkowych i integracyjnych, 14 przeglądowych, pipeline zielony |
 
 ### Ścieżka do przeklikania (2 minuty)
 
