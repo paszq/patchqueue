@@ -230,6 +230,48 @@ nie odróżnia „przegląd wypadł dobrze" od „przeglądu nie było".
 
 ---
 
+## Audyt wymagań: co pokazało sprawdzenie wszystkich siedemnastu
+
+FR-015 był spełniony w połowie i wyglądał na zrobiony, bo działał dla odrzuceń. Skoro
+jedno wymaganie tak wyszło, zasadne było pytanie o pozostałe szesnaście — więc każde
+zostało sprawdzone osobno w kodzie i w testach, a znaleziska odtworzone w działającej
+aplikacji. Pełny zapis: `context/foundation/fr-audit.md`.
+
+|                                   | Liczba     |
+| --------------------------------- | ---------- |
+| Spełnione w pełni, z dowodem      | 15         |
+| Spełnione z zastrzeżeniem         | 1 — FR-008 |
+| Świadomie poza MVP (nice-to-have) | 1 — FR-017 |
+| **Naruszeń wymagań must-have**    | **0**      |
+
+**Wzorzec się nie powtórzył.** Nie znaleziono drugiego wymagania spełnionego w połowie.
+To był cel audytu i to jest jego główny wynik.
+
+**FR-008 — interfejs rozstrzygnął za dokument.** Wymaganie mówi bez zastrzeżeń, że
+użytkownik może poprawić dane wprowadzonej podatności; formularz istnieje wyłącznie dla
+pozycji otwartej. Uważam ograniczenie za słuszne — zmiana oceny pozycji już rozstrzygniętej
+zmieniałaby wstecz okoliczności zapadłej decyzji, czego produkt zabrania wszędzie indziej —
+ale PRD nie zapisuje ani tego warunku, ani jego przeciwieństwa. To niedookreślenie
+wymagania, nie usterka, i jako takie zostaje odnotowane zamiast po cichu naprawione.
+
+**Znalezisko poza tabelą: priorytet pozycji rozstrzygniętej przelicza się przy odczycie.**
+Odtworzone w aplikacji, nie wywnioskowane z kodu. Pozycja **załatana** przy zasobie
+publicznym miała priorytet `8.00`; po zmianie ekspozycji zasobu na „odcięty" ta sama, wciąż
+rozstrzygnięta pozycja pokazuje `2.40`.
+
+Nie narusza to żadnego FR ani US-02 — zapisane rozstrzygnięcie, jego uzasadnienie i data
+pozostają nietknięte, zmienia się wyłącznie liczba obok. Jest to natomiast **trzecie
+wystąpienie wzorca opisanego w raporcie architektonicznym**: agregat `MonitoredAsset`
+implementuje regułę poprawnie, a strona, która pokazuje liczbę, agregat omija.
+
+Najciekawsza jest tu pomyłka we własnej prognozie. `01-domain-distillation.md` oznaczył ten
+niezmiennik jako _deklarowany, nie egzekwowany_ i przewidział, że złamie go **zapisanie
+priorytetu w wierszu**. Złamało go dokładnie odwrotne zachowanie: priorytet **nie jest**
+przechowywany i właśnie dlatego przelicza się także tam, gdzie nie powinien. Diagnoza
+o braku strażnika była trafna, przewidywany mechanizm — nie.
+
+---
+
 ## Wątek przekrojowy: siedem razy zielony wynik znaczył „nie sprawdziłem"
 
 To najmocniejsza rzecz, jaką ten projekt pokazał, i jedyny powód, dla którego opisuję ją
