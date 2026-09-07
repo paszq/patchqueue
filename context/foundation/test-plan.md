@@ -1,12 +1,11 @@
-# Test Plan
+# Plan testów
 
-> Phased test rollout for this project. Strategy is frozen at the top
-> (§1–§5); cookbook patterns at the bottom (§6) fill in as phases ship.
-> Read before writing any new test.
+> Wdrożenie testów w przekrojach. Strategia (§1–§5) jest ustalona; kucharka (§6)
+> rośnie wraz z kolejnymi przekrojami. Czytać przed napisaniem każdego nowego testu.
 >
-> Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
+> Odświeżyć, gdy dokument się zdezaktualizuje — kryteria w §8.
 >
-> Last updated: 2026-09-02
+> Ostatnia aktualizacja: 2026-09-08
 
 ## 1. Strategia
 
