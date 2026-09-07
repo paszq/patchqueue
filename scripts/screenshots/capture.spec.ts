@@ -30,7 +30,7 @@ test("zrzuty ekranu do zgłoszenia", async ({ page }) => {
 
   await page.locator("#email").fill(EMAIL);
   await page.locator("#password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("button", { name: "Zaloguj się" }).click();
   await page.waitForURL(/\/queue/, { timeout: 30_000 });
 
   // 2. Kolejka — teza produktu: 5.0 na zasobie wystawionym nad 9.8 na odciętym

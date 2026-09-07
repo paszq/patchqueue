@@ -56,7 +56,7 @@ async function signUp(page: Page): Promise<void> {
   await fillHydrated(page, "#email", freshEmail());
   await fillHydrated(page, "#password", PASSWORD);
   await fillHydrated(page, "#confirmPassword", PASSWORD);
-  await page.getByRole("button", { name: "Create account" }).click();
+  await page.getByRole("button", { name: "Załóż konto" }).click();
   try {
     await page.waitForURL(/\/queue/, { timeout: 20_000 });
   } catch {
@@ -121,7 +121,7 @@ test.describe("formularze uwierzytelniania", () => {
 
     await page.locator("#email").fill("demo@example.com");
     await page.locator("#password").fill("Demo12345!");
-    await page.getByRole("button", { name: /sign in/i }).click();
+    await page.getByRole("button", { name: /zaloguj się/i }).click();
     await page.waitForURL(/\/queue/, { timeout: 20_000 });
   });
 
@@ -138,7 +138,7 @@ test.describe("formularze uwierzytelniania", () => {
       set("password", "Demo12345!");
     });
 
-    await page.getByRole("button", { name: /sign in/i }).click();
+    await page.getByRole("button", { name: /zaloguj się/i }).click();
     await page.waitForURL(/\/queue/, { timeout: 20_000 });
     await expect(page.getByRole("heading", { name: "Kolejka" })).toBeVisible();
   });

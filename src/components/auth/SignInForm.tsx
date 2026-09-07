@@ -36,12 +36,12 @@ export default function SignInForm({ serverError }: Props) {
 
     const next: typeof errors = {};
     if (!emailValue) {
-      next.email = "Email is required";
+      next.email = "Adres e-mail jest wymagany";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
-      next.email = "Enter a valid email address";
+      next.email = "Podaj poprawny adres e-mail";
     }
     if (!passwordValue) {
-      next.password = "Password is required";
+      next.password = "Hasło jest wymagane";
     }
     const valid = Object.keys(next).length === 0;
     setErrors(valid ? {} : next);
@@ -74,7 +74,7 @@ export default function SignInForm({ serverError }: Props) {
       <FormField
         id="email"
         type="email"
-        label="Email"
+        label="Adres e-mail"
         value={email}
         onChange={(v) => {
           setEmail(v);
@@ -87,14 +87,14 @@ export default function SignInForm({ serverError }: Props) {
 
       <FormField
         id="password"
-        label="Password"
+        label="Hasło"
         type={showPassword ? "text" : "password"}
         value={password}
         onChange={(v) => {
           setPassword(v);
           clearError("password");
         }}
-        placeholder="Your password"
+        placeholder="Twoje hasło"
         error={errors.password}
         icon={<Lock className="size-4" />}
         endContent={
@@ -109,8 +109,8 @@ export default function SignInForm({ serverError }: Props) {
 
       <ServerError message={serverError} />
 
-      <SubmitButton pendingText="Signing in..." icon={<LogIn className="size-4" />}>
-        Sign in
+      <SubmitButton pendingText="Logowanie…" icon={<LogIn className="size-4" />}>
+        Zaloguj się
       </SubmitButton>
     </form>
   );
