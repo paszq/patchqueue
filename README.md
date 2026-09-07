@@ -1,175 +1,147 @@
-# 10x Astro Starter
+# PatchQueue
 
-![](./public/template.png)
+**Kolejka łatania podatności, która wie, gdzie dana podatność stoi.**
 
-A modern, opinionated starter template for building fast, accessible web applications.
+Ocena CVSS mówi, jak groźna jest podatność sama w sobie. Nie mówi, czy siedzi na serwerze
+wystawionym do internetu, czy na maszynie odciętej od sieci. PatchQueue łączy jedno
+z drugim i układa kolejkę według tego, co naprawdę zagraża.
 
-## Tech Stack
+![Strona wejściowa PatchQueue](./docs/screenshots/00-strona-wejsciowa.png)
 
-- [Astro](https://astro.build/) v6 - Modern web framework with server-first rendering
-- [React](https://react.dev/) v19 - UI library for interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4 - Utility-first CSS framework
-- [Supabase](https://supabase.com/) - Authentication and backend-as-a-service
-- [Cloudflare Workers](https://workers.cloudflare.com/) - Edge deployment runtime
+**Aplikacja na żywo:** https://patchqueue.paszekkrystian-19.workers.dev
 
-## Prerequisites
+## Na czym polega różnica
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
+Ta sama podatność `CVE-2026-1234` z oceną **9.8** na dwóch różnych zasobach:
 
-## Getting Started
+| Zasób            | Ekspozycja         | Krytyczność | Wynik           | Priorytet          |
+| ---------------- | ------------------ | ----------- | --------------- | ------------------ |
+| `srv-web-01`     | z sieci publicznej | wysoka      | 9.8 × 1 × 1     | **krytyczny 9.80** |
+| `lab-offline-01` | odcięty            | niska       | 9.8 × 0.3 × 0.5 | **niski 1.47**     |
 
-1. Clone the repository:
+Sortowanie po samej ocenie CVSS postawiłoby je obok siebie. Tu dzieli je cała kolejka.
 
-```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
-```
+Obie skale są ściśle malejące, więc reguła „podatność na zasobie wystawionym nigdy nie
+ląduje niżej niż ta sama podatność na zasobie odciętym" nie jest założeniem, którego trzeba
+pilnować — jest własnością konstrukcyjną iloczynu, sprawdzaną testem na pełnej siatce
+kombinacji.
 
-2. Install dependencies:
+## Co jeszcze robi
+
+- **Priorytet ze składnikami** — przy każdej pozycji widać ocenę, wagę ekspozycji i wagę
+  krytyczności, nie samą liczbę końcową. Priorytet nie jest przechowywany; wynika z reguły
+  i liczy się przy odczycie, żeby nie mógł się rozjechać ze stanem zasobu.
+- **Ślad decyzji, którego nie da się zatrzeć** — odrzucenie wymaga powodu, załatanie
+  przyjmuje dowód, a przywrócenie do kolejki dopisuje wpis zamiast kasować poprzedni.
+  Tabela historii nie ma polityki `UPDATE` ani `DELETE`, więc reguła obowiązuje też przy
+  zapisie z pominięciem aplikacji.
+- **Wczytywanie z zewnętrznych źródeł** — raport skanera w CSV, biuletyn bezpieczeństwa
+  albo goła lista identyfikatorów, z pliku lub wklejone. Znaleziska dopasowują się do
+  zasobów po komponencie; niedopasowane są raportowane, a nie pomijane po cichu.
+- **Guardraile egzekwowane przez bazę** — zasobu z otwartymi pozycjami nie da się usunąć
+  (odmowa wymienia blokujące), a ta sama podatność nie może stać dwa razy na tym samym
+  zasobie.
+
+## Stack
+
+| Warstwa          | Wybór                                                                              |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| Framework        | [Astro 6](https://astro.build/) w trybie SSR, wyspy [React 19](https://react.dev/) |
+| Język            | TypeScript 5                                                                       |
+| Style            | [Tailwind CSS 4](https://tailwindcss.com/)                                         |
+| Logowanie i baza | [Supabase](https://supabase.com/) — z politykami dostępu na poziomie wierszy       |
+| Wdrożenie        | [Cloudflare Workers](https://workers.cloudflare.com/)                              |
+
+Uzasadnienie wyboru i przyjęte ryzyka: [`context/foundation/tech-stack.md`](./context/foundation/tech-stack.md).
+
+## Uruchomienie lokalne
+
+Wymagania: Node.js 22.14.0 (patrz `.nvmrc`) oraz [Docker](https://www.docker.com/), jeśli
+chcesz postawić Supabase lokalnie.
 
 ```bash
 npm install
+cp .env.example .env        # dla Node
+cp .env.example .dev.vars   # dla lokalnego środowiska Cloudflare
 ```
 
-3. Set up Supabase and configure environment variables — see [Supabase Configuration](#supabase-configuration) below.
+### Baza
 
-4. Create a `.dev.vars` file for local Cloudflare dev secrets:
+Projekt ma **trzy tabele i cztery migracje** — bez nich aplikacja nie działa.
 
 ```bash
-cp .env.example .dev.vars
+npx supabase start          # stawia lokalny stos i stosuje migracje z supabase/migrations
 ```
 
-5. Run the development server:
+Skopiuj `SUPABASE_URL` i klucz `anon` wypisane przez CLI do `.env` oraz `.dev.vars`.
+Lokalne Studio: `http://localhost:54323`.
+
+Wobec projektu w chmurze migracje wypycha się przez `npx supabase db push` po wcześniejszym
+`npx supabase login` i `npx supabase link --project-ref <ref>`.
+
+Dane demonstracyjne: `node scripts/seed.mjs`.
+
+### Start
 
 ```bash
-npm run dev
+npm run dev                 # http://localhost:4321
 ```
 
-## Available Scripts
+## Skrypty
 
-- `npm run dev` - Start development server (Cloudflare workerd runtime)
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint with type-checked rules
-- `npm run lint:fix` - Auto-fix ESLint issues
-- `npm run format` - Run Prettier
+| Komenda                     | Co robi                                             |
+| --------------------------- | --------------------------------------------------- |
+| `npm run dev`               | serwer deweloperski (środowisko workerd)            |
+| `npm run build`             | build produkcyjny (SSR przez `@astrojs/cloudflare`) |
+| `npm run preview`           | podgląd builda                                      |
+| `npm run lint` / `lint:fix` | ESLint z regułami opartymi o typy                   |
+| `npm run typecheck`         | `astro check`                                       |
+| `npm test`                  | Vitest — 83 testy jednostkowe i integracyjne        |
+| `npm run test:e2e`          | Playwright — 16 scenariuszy                         |
 
-## Project Structure
-
-```md
-.
-├── src/
-│ ├── layouts/ # Astro layouts
-│ ├── pages/ # Astro pages
-│ │ └── api/ # API endpoints
-│ ├── components/ # UI components (Astro & React)
-│ └── assets/ # Static assets
-├── public/ # Public assets
-├── wrangler.jsonc # Cloudflare Workers config
-```
-
-## Supabase Configuration
-
-This project uses [Supabase](https://supabase.com/) for authentication. Environment variables are declared via Astro's `astro:env` schema and are treated as **server-only secrets** — they are never exposed to the client.
-
-### First-time setup (local, no cloud project needed)
-
-Requires [Docker](https://www.docker.com/) and ~7 GB RAM.
-
-1. Create your `.env` file:
+Testy przeciw wdrożonej instancji:
 
 ```bash
-cp .env.example .env
+BASE_URL=https://patchqueue.paszekkrystian-19.workers.dev npx playwright test
 ```
 
-2. Initialize the local Supabase project (creates a `supabase/` config folder):
+## Bramki jakości
 
-```bash
-npx supabase init
-```
+`lint` → `typecheck` → testy jednostkowe i integracyjne → testy przeglądowe → build →
+wdrożenie → **ponowna weryfikacja żywej instancji tym samym zestawem testów**.
 
-3. Start the local stack (downloads Docker images on first run):
+Do tego pięć reguł [`dependency-cruiser`](./.dependency-cruiser.cjs), z których dwie
+pilnują, żeby moduł domenowy nie sięgał do bazy, HTTP ani widoku — dzięki czemu zdanie
+„reguła domenowa nie zależy od niczego" jest sprawdzane, a nie deklarowane.
 
-```bash
-npx supabase start
-```
+Pipeline: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml). Osobny workflow
+[`impl-review.yml`](./.github/workflows/impl-review.yml) uruchamia agenta przeglądającego
+implementację względem planu zmiany i komentującego pull requesty.
 
-4. Copy the credentials printed by the CLI into your `.env` and `.dev.vars`:
-
-```
-SUPABASE_URL=http://127.0.0.1:54321
-SUPABASE_KEY=<anon key from CLI output>
-```
-
-5. To stop the stack when done:
-
-```bash
-npx supabase stop
-```
-
-The local Studio UI is available at `http://localhost:54323`.
-
-No database tables or migrations are required — this project uses Supabase Auth's built-in `auth.users` table only.
-
-### Using a cloud Supabase project instead
-
-If you prefer to use a hosted Supabase project, add these variables to your `.env` and `.dev.vars` files:
-
-| Variable       | Description                                                |
-| -------------- | ---------------------------------------------------------- |
-| `SUPABASE_URL` | Project URL from Supabase dashboard → Settings → API       |
-| `SUPABASE_KEY` | `anon` public key from Supabase dashboard → Settings → API |
+## Struktura
 
 ```
-SUPABASE_URL=https://<project-ref>.supabase.co
-SUPABASE_KEY=<anon-key>
+src/
+├── lib/domain/        # reguła priorytetu i agregat — bez zależności zewnętrznych
+├── lib/services/      # warstwa danych, rozdzielona wzdłuż pojęć domenowych
+├── pages/             # strony i punkty końcowe
+└── components/        # widok (Astro; React tylko tam, gdzie potrzebna interaktywność)
+supabase/migrations/   # schemat, polityki dostępu, wyzwalacze, funkcje
+tests/integration/     # reguły egzekwowane w bazie — bez atrap
+e2e/                   # ścieżki użytkownika
+context/               # dokumenty projektu (poniżej)
 ```
 
-### Email confirmation in local development
+## Dokumenty
 
-By default Supabase requires email confirmation before a user can sign in. To skip this during local development:
+| Plik                                                                   | Po co                                                      |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------- |
+| [`context/foundation/prd.md`](./context/foundation/prd.md)             | wymagania, historyjki, guardraile                          |
+| [`context/foundation/test-plan.md`](./context/foundation/test-plan.md) | mapa ryzyka i kucharka testów                              |
+| [`context/foundation/fr-audit.md`](./context/foundation/fr-audit.md)   | audyt wszystkich wymagań względem kodu                     |
+| [`context/map/repo-map.md`](./context/map/repo-map.md)                 | mapa repozytorium z jawnym zasięgiem pomiaru               |
+| [`context/domain/`](./context/domain/)                                 | destylacja domeny, niezmienniki, plan odcięcia od dostawcy |
+| [`RAPORT-ARCHITEKTONICZNY.md`](./RAPORT-ARCHITEKTONICZNY.md)           | co pokazały cztery badania architektoniczne                |
+| [`CLAUDE.md`](./CLAUDE.md)                                             | komendy, konwencje i reguły domenowe dla agenta            |
 
-1. Open the Supabase dashboard for your project
-2. Go to **Authentication → Email → Confirm email**
-3. Toggle it **off**
-
-Users can then sign in immediately after sign-up without clicking a confirmation link.
-
-### Auth routes
-
-| Route                 | Description                                                             |
-| --------------------- | ----------------------------------------------------------------------- |
-| `/auth/signin`        | Email/password sign-in form                                             |
-| `/auth/signup`        | Email/password sign-up form                                             |
-| `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
-| `/dashboard`          | Example protected page (redirects to `/auth/signin` if unauthenticated) |
-
-Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array there to require authentication.
-
-## Deployment
-
-This project deploys to [Cloudflare Workers](https://workers.cloudflare.com/).
-
-1. Build the project:
-
-```bash
-npm run build
-```
-
-2. Deploy with Wrangler:
-
-```bash
-npx wrangler deploy
-```
-
-Set `SUPABASE_URL` and `SUPABASE_KEY` as secrets in your Cloudflare dashboard or via `npx wrangler secret put`.
-
-## CI
-
-GitHub Actions runs lint + build on every push and PR to `master`. Configure `SUPABASE_URL` and `SUPABASE_KEY` as repository secrets in GitHub for the build step.
-
-## License
-
-MIT
+Projekt zaliczeniowy 10xDevs 3.0.
