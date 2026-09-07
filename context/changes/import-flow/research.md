@@ -1,7 +1,7 @@
 ---
 date: 2026-09-02T21:40:00+02:00
 researcher: Krystian Paszek (z Claude Opus 5)
-git_commit: d94df1b
+git_commit: 9af529b
 branch: main
 repository: paszq/patchqueue
 topic: "Ścieżka wczytywania znalezisk z zewnętrznych źródeł — gdzie mieszka decyzja, co się dzieje przy błędzie, czego brakuje po drugiej stronie"
@@ -14,7 +14,7 @@ last_updated_by: Krystian Paszek
 # Research: ścieżka wczytywania znalezisk z zewnętrznych źródeł
 
 **Data**: 2026-09-02, 21:40 (+02:00)
-**Commit**: `c34df14`
+**Commit**: `9af529b`
 **Gałąź**: `main`
 **Repozytorium**: `paszq/patchqueue`
 
@@ -226,7 +226,7 @@ asymetrii — walidacja kształtu identyfikatora powinna wejść do miejsca wsp�
 - `context/domain/01-domain-distillation.md` — klasyfikuje tłumaczenie obcych formatów jako
   subdomenę **wspierającą**; niniejsze badanie tego nie podważa, ale pokazuje, że reguły
   o pozycji przeciekły do subdomeny wspierającej z subdomeny rdzeniowej
-- `commit 0bab983` — wprowadzenie warstwy tłumaczącej wraz z opisem trzech błędów złapanych
+- `commit 3face93` — wprowadzenie warstwy tłumaczącej wraz z opisem trzech błędów złapanych
   przez testy tabelaryczne
 
 ## Pytania otwarte

@@ -3,7 +3,7 @@ change_id: refactor-opportunities
 created: 2026-08-21
 last_updated: 2026-08-21
 tags: [research, architektura, verified]
-verified_at_commit: 55a2837
+verified_at_commit: 86fb76a
 inputs:
   - context/map/repo-map.md
   - context/map/artifact-2-structure.md

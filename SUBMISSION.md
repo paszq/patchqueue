@@ -144,7 +144,7 @@ cztery artefakty w jedną odpowiedź na pytanie, gdzie mieszka wiedza o produkci
 przewodni, w który wszystkie cztery badania trafiły niezależnie: **reguła dotycząca pozycji
 zostaje zapisana tam, gdzie po raz pierwszy była potrzebna, a nie tam, gdzie pozycja jest
 definiowana.** Trzy potwierdzone wystąpienia, dwa naprawione, jedno otwarte i opisane.
-Commit: `30cfa0e`.
+Commit: `458679d`.
 
 **Research wybranej funkcji** — `context/changes/import-flow/research.md`, artefakt L3.
 Ścieżka wczytywania jest jedyną funkcją przechodzącą przez wszystkie warstwy naraz.
@@ -153,7 +153,7 @@ Najmocniejsze ustalenie nie pochodzi z analizy, tylko z danych produkcyjnych: pi
 walidujący wymaga w numerze czterech do siedmiu cyfr, a ten ma trzy. Wszedł formularzem,
 który nie sprawdza kształtu w ogóle. Te same pięć wierszy ujawniło wcześniej brak reguły
 o duplikatach — jedne dane, dwie niezależne luki, obie po tej samej stronie.
-Commit: `6ffeab7`.
+Commit: `8818f44`.
 
 **Destylacja domeny** — `context/domain/01-domain-distillation.md`. Czternaście pojęć
 z dokumentów i kodu, przypisanie subdomen (Core / Supporting / Generic), trzech
@@ -207,8 +207,8 @@ zauważył**, oba tej samej klasy — plan deklarował pokrycie, którego nie by
 
 | Przebieg | Ustalenie                                                                                                                                        | Reakcja                                             |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
-| 1        | `translate()` obsługuje zapis **i** aktualizację, kontrakt planu to deklarował, testy jechały wyłącznie wstawianiem                              | test integracyjny na ścieżkę edycji (`01abf15`)     |
-| 2        | Luka na poziomie bazy zamknięta, ale tłumaczenie komunikatu przy edycji nadal nietestowane — test uderzał w bazę z pominięciem warstwy aplikacji | test przeglądowy przez formularz edycji (`1ed479a`) |
+| 1        | `translate()` obsługuje zapis **i** aktualizację, kontrakt planu to deklarował, testy jechały wyłącznie wstawianiem                              | test integracyjny na ścieżkę edycji (`94fcb64`)     |
+| 2        | Luka na poziomie bazy zamknięta, ale tłumaczenie komunikatu przy edycji nadal nietestowane — test uderzał w bazę z pominięciem warstwy aplikacji | test przeglądowy przez formularz edycji (`f553ab5`) |
 
 Drugie ustalenie jest istotniejsze niż pierwsze: agent **zawęził** swój własny zarzut po
 poprawce, zamiast uznać sprawę za zamkniętą albo powtórzyć to samo zdanie. To jest różnica
@@ -217,7 +217,7 @@ między przeglądem, który czyta kod, a takim, który generuje uprzejmy komenta
 Zgłoszenie w poprzedniej wersji mówiło, że ten workflow „leży gotowy, wymaga tylko sekretu".
 **To było nieprawdą i warto wiedzieć, o ile.** Pierwsze prawdziwe uruchomienie ujawniło
 cztery niezależne braki, jeden po drugim: sekret `ANTHROPIC_API_KEY`, uprawnienie
-`id-token: write` w bloku `permissions` (`a6678ff`), aplikację GitHub „Claude"
+`id-token: write` w bloku `permissions` (`64a95b2`), aplikację GitHub „Claude"
 zainstalowaną w repozytorium oraz klucz API związany z przestrzenią roboczą, a nie
 z tożsamością. Żaden nie był widoczny wcześniej, bo plik istniał i wyglądał kompletnie.
 
@@ -316,7 +316,7 @@ odróżnia jedno od drugiego i zawodzi z wyraźnym komunikatem, gdy funkcji brak
 po `viewport` i `deviceScaleFactor`, więc je kasowało — obrazki wychodziły w 1280 px zamiast
 zadanych 1440 i bez skalowania. Plik trafił na `main` **bez uruchomienia kontroli typów**,
 więc bramka była czerwona, a nikt tego nie zauważył. Wykryte dopiero przy następnym pełnym
-przebiegu bramek. Naprawa: `48baf4a`.
+przebiegu bramek. Naprawa: `08e010f`.
 
 **7. Bramka przeglądu świeci na zielono bez przeglądu.** Opisane w bloku Champion powyżej:
 gdy agent nie opublikuje raportu, krok weryfikujący werdykt odczytuje **poprzedni** plik,

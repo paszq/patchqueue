@@ -1,6 +1,6 @@
 # Audyt wymagań FR-001…FR-017 względem kodu i testów
 
-**Data**: 2026-09-02 · **Commit**: `a9e399a` · **Metoda**: każde wymaganie sprawdzone
+**Data**: 2026-09-02 · **Commit**: `f3cb888` · **Metoda**: każde wymaganie sprawdzone
 osobno w kodzie, a tam gdzie to możliwe — odtworzone w działającej aplikacji.
 
 Powód powstania: przy domykaniu zgłoszenia certyfikacyjnego okazało się, że **FR-015 był

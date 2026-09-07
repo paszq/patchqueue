@@ -101,7 +101,7 @@ i przeszłaby także po usunięciu migracji.
   rozdzielone bez dotykania dziewięciu modułów zależnych, dzięki zachowaniu punktu wejścia.
 - **Agregat „zasób wraz ze swoimi pozycjami"** (`10f9501`) — sprowadza niezmienniki całości
   do kodu domenowego, nie zabierając bazie roli ostatecznego strażnika.
-- **Reguła unikalności pozycji** (`9d242a9`, `02e1506`) — trzecie wystąpienie wzorca,
+- **Reguła unikalności pozycji** (`9f820cb`, `98510a7`) — trzecie wystąpienie wzorca,
   domknięte migracją i tłumaczeniem odmowy na język produktu.
 
 ## Co świadomie zostawiono
