@@ -17,7 +17,13 @@ const PASSWORD = process.env.DEMO_PASSWORD ?? "Demo12345!";
 test("zrzuty ekranu do zgłoszenia", async ({ page }) => {
   test.setTimeout(180_000);
 
-  // 1. Ekran logowania — mechanizm kontroli dostępu
+  // 1. Strona wejściowa — pierwsze, co widzi ktoś, kto zna tylko adres
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /Ta sama podatność/ })).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await page.screenshot({ path: `${DIR}/00-strona-wejsciowa.png`, fullPage: true });
+
+  // 2. Ekran logowania — mechanizm kontroli dostępu
   await page.goto("/auth/signin");
   await page.waitForLoadState("networkidle");
   await page.screenshot({ path: `${DIR}/01-logowanie.png`, fullPage: true });

@@ -2,7 +2,6 @@ import { defineMiddleware } from "astro:middleware";
 import { createClient } from "@/lib/supabase";
 
 const PROTECTED_ROUTES = [
-  "/dashboard",
   "/queue",
   "/assets",
   "/items",

@@ -1,8 +1,138 @@
 ---
-import Welcome from "@/components/Welcome.astro";
+/**
+ * Strona wejściowa — pierwsze, co widzi ktoś, kto zna tylko adres.
+ *
+ * Nie opisuje funkcji, tylko pokazuje tezę produktu na jednym przykładzie: ta sama
+ * podatność o tej samej ocenie CVSS stoi na dwóch końcach kolejki, bo stoi na dwóch
+ * różnych zasobach. Liczby pochodzą z reguły w `@/lib/domain/priority`, nie są wpisane
+ * ręcznie — gdyby wagi się zmieniły, ta strona zmieni się razem z kolejką.
+ */
 import Layout from "@/layouts/Layout.astro";
+import PriorityBadge from "@/components/app/PriorityBadge.astro";
+import { assessPriority } from "@/lib/domain/priority";
+import { CRITICALITY_LABEL, EXPOSURE_LABEL } from "@/types";
+
+const CVSS = 9.8;
+
+const wystawiony = {
+  asset: "srv-web-01",
+  exposure: "public" as const,
+  criticality: "high" as const,
+};
+const odciety = {
+  asset: "lab-offline-01",
+  exposure: "isolated" as const,
+  criticality: "low" as const,
+};
+
+const przyklady = [wystawiony, odciety].map((a) => ({
+  ...a,
+  assessment: assessPriority({ cvss: CVSS, exposure: a.exposure, criticality: a.criticality }),
+}));
+
+const card = "rounded-lg border border-slate-800 bg-slate-900/40 p-5";
 ---
 
-<Layout>
-  <Welcome />
+<Layout title="PatchQueue — kolejka łatania, która wie, gdzie stoi podatność">
+  <main class="min-h-screen bg-slate-950 text-slate-100">
+    <div class="mx-auto max-w-3xl px-4 py-16 sm:py-24">
+      <p class="text-sm font-semibold tracking-tight text-slate-400">PatchQueue</p>
+
+      <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">
+        Ta sama podatność, inny zasób, inny priorytet
+      </h1>
+
+      <p class="mt-4 text-lg text-slate-300">
+        Ocena CVSS mówi, jak groźna jest podatność sama w sobie. Nie mówi, czy siedzi na serwerze wystawionym do
+        internetu, czy na maszynie odciętej od sieci. PatchQueue łączy jedno z drugim i układa kolejkę łatania według
+        tego, co naprawdę zagraża.
+      </p>
+
+      <section class="mt-10" aria-labelledby="przyklad">
+        <h2 id="przyklad" class="text-sm font-semibold text-slate-200">
+          Ta sama podatność <span class="font-mono text-slate-400">CVE-2026-1234</span>, ocena CVSS {CVSS}
+        </h2>
+        <p class="mt-1 text-sm text-slate-500">
+          Dwa zasoby, dwa końce kolejki. Sortowanie po samej ocenie postawiłoby je obok siebie.
+        </p>
+
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          {
+            przyklady.map((p) => (
+              <div class:list={[card, "flex flex-col gap-3"]}>
+                <div class="flex items-center justify-between gap-3">
+                  <span class="font-mono text-sm text-slate-200">{p.asset}</span>
+                  <PriorityBadge priority={p.assessment.priority} score={p.assessment.score} />
+                </div>
+                <dl class="space-y-1 text-xs text-slate-400">
+                  <div class="flex justify-between gap-3">
+                    <dt>Ekspozycja</dt>
+                    <dd class="text-slate-300">{EXPOSURE_LABEL[p.exposure]}</dd>
+                  </div>
+                  <div class="flex justify-between gap-3">
+                    <dt>Krytyczność</dt>
+                    <dd class="text-slate-300">{CRITICALITY_LABEL[p.criticality]}</dd>
+                  </div>
+                  <div class="flex justify-between gap-3 border-t border-slate-800 pt-1 font-mono">
+                    <dt>Wynik</dt>
+                    <dd class="text-slate-200">
+                      {CVSS} × {p.assessment.factors.exposureWeight} × {p.assessment.factors.criticalityWeight} ={" "}
+                      {p.assessment.score.toFixed(2)}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a
+          href="/auth/signin"
+          class="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:bg-white"
+        >
+          Zaloguj się
+        </a>
+        <a
+          href="/auth/signup"
+          class="rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-800"
+        >
+          Załóż konto
+        </a>
+      </div>
+
+      <section class="mt-14 grid gap-3 sm:grid-cols-3" aria-label="Co produkt robi">
+        <div class:list={card}>
+          <h3 class="text-sm font-semibold text-slate-200">Priorytet ze składnikami</h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Przy każdej pozycji widać ocenę, wagę ekspozycji i wagę krytyczności — nie samą liczbę końcową.
+          </p>
+        </div>
+        <div class:list={card}>
+          <h3 class="text-sm font-semibold text-slate-200">Ślad decyzji nie znika</h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Odrzucenie wymaga powodu, załatanie przyjmuje dowód, a przywrócenie do kolejki dopisuje wpis zamiast kasować
+            poprzedni.
+          </p>
+        </div>
+        <div class:list={card}>
+          <h3 class="text-sm font-semibold text-slate-200">Wczytywanie z raportów</h3>
+          <p class="mt-2 text-sm text-slate-400">
+            Raport skanera, biuletyn albo goła lista identyfikatorów trafiają do kolejki i dopasowują się do zasobów po
+            komponencie.
+          </p>
+        </div>
+      </section>
+
+      <footer class="mt-14 border-t border-slate-800 pt-6 text-xs text-slate-500">
+        Projekt zaliczeniowy 10xDevs ·
+        <a
+          href="https://github.com/paszq/patchqueue"
+          class="underline underline-offset-2 hover:text-slate-300"
+          rel="noopener noreferrer">kod źródłowy na GitHubie</a
+        >
+      </footer>
+    </div>
+  </main>
 </Layout>
