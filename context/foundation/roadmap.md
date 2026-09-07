@@ -38,32 +38,32 @@ głównej tezy produktu; wszystko dalsze ma znaczenie tylko wtedy, gdy ten momen
 
 ## At a glance
 
-| ID | Change ID | Outcome (użytkownik może …) | Prerequisites | PRD refs | Status |
-| --- | --- | --- | --- | --- | --- |
-| F-01 | project-scaffold | (fundament) szkielet aplikacji stoi, bramki jakości przechodzą lokalnie | — | NFR-01, NFR-03 | done |
-| F-02 | account-isolation | (fundament) konto rozdziela dane, izolacja wymuszana przez bazę | F-01 | NFR-05, Access Control | done |
-| F-03 | verification-pipeline | (fundament) każda zmiana przechodzi lint, typy i testy automatycznie | F-01, S-01 | NFR-01, NFR-05 | done |
-| S-01 | first-sign-in | założyć konto, zalogować się i zobaczyć pustą kolejkę z wyjaśnieniem | F-01, F-02 | US-01, FR-001, FR-002 | done |
-| S-02 | asset-registry | zarejestrować zasób z ekspozycją i krytycznością oraz zobaczyć go na liście | S-01 | FR-003, FR-004 | done |
-| S-03 | priority-visible | dopisać podatność i zobaczyć priorytet, jego składniki oraz termin | S-02 | US-01, FR-007, FR-010, FR-011 | done |
-| S-04 | ordered-queue | zobaczyć kolejkę uporządkowaną priorytetem, z oznaczeniem pozycji po terminie | S-03 | US-01, FR-012, NFR-01 | done |
-| S-05 | decision-trail | zamknąć pozycję jako załataną albo odrzuconą z powodem i wrócić do uzasadnienia | S-04 | US-01, FR-013, FR-014, FR-015 | done |
-| S-06 | reopen-decision | przywrócić zamkniętą pozycję do kolejki bez utraty poprzedniego rozstrzygnięcia | S-05 | US-04, FR-016 | done |
-| S-07 | exposure-recalc | zmienić ekspozycję zasobu i zobaczyć przeliczoną kolejkę | S-04 | US-02, FR-005 | done |
-| S-08 | safe-removal | poprawiać i usuwać wpisy bez naruszenia śladu decyzji | S-05 | US-03, FR-006, FR-008, FR-009 | done |
-| S-09 | grounded-summary | poprosić o streszczenie i kroki naprawcze wyprowadzone z własnego opisu | S-03, F-03 | FR-017, NFR-02, NFR-04 | blocked |
+| ID   | Change ID             | Outcome (użytkownik może …)                                                     | Prerequisites | PRD refs                      | Status  |
+| ---- | --------------------- | ------------------------------------------------------------------------------- | ------------- | ----------------------------- | ------- |
+| F-01 | project-scaffold      | (fundament) szkielet aplikacji stoi, bramki jakości przechodzą lokalnie         | —             | NFR-01, NFR-03                | done    |
+| F-02 | account-isolation     | (fundament) konto rozdziela dane, izolacja wymuszana przez bazę                 | F-01          | NFR-05, Access Control        | done    |
+| F-03 | verification-pipeline | (fundament) każda zmiana przechodzi lint, typy i testy automatycznie            | F-01, S-01    | NFR-01, NFR-05                | done    |
+| S-01 | first-sign-in         | założyć konto, zalogować się i zobaczyć pustą kolejkę z wyjaśnieniem            | F-01, F-02    | US-01, FR-001, FR-002         | done    |
+| S-02 | asset-registry        | zarejestrować zasób z ekspozycją i krytycznością oraz zobaczyć go na liście     | S-01          | FR-003, FR-004                | done    |
+| S-03 | priority-visible      | dopisać podatność i zobaczyć priorytet, jego składniki oraz termin              | S-02          | US-01, FR-007, FR-010, FR-011 | done    |
+| S-04 | ordered-queue         | zobaczyć kolejkę uporządkowaną priorytetem, z oznaczeniem pozycji po terminie   | S-03          | US-01, FR-012, NFR-01         | done    |
+| S-05 | decision-trail        | zamknąć pozycję jako załataną albo odrzuconą z powodem i wrócić do uzasadnienia | S-04          | US-01, FR-013, FR-014, FR-015 | done    |
+| S-06 | reopen-decision       | przywrócić zamkniętą pozycję do kolejki bez utraty poprzedniego rozstrzygnięcia | S-05          | US-04, FR-016                 | done    |
+| S-07 | exposure-recalc       | zmienić ekspozycję zasobu i zobaczyć przeliczoną kolejkę                        | S-04          | US-02, FR-005                 | done    |
+| S-08 | safe-removal          | poprawiać i usuwać wpisy bez naruszenia śladu decyzji                           | S-05          | US-03, FR-006, FR-008, FR-009 | done    |
+| S-09 | grounded-summary      | poprosić o streszczenie i kroki naprawcze wyprowadzone z własnego opisu         | S-03, F-03    | FR-017, NFR-02, NFR-04        | blocked |
 
 ## Streams
 
 Pomoc nawigacyjna — grupuje pozycje dzielące łańcuch zależności. Porządek wiążący
 pozostaje w grafie zależności poniżej.
 
-| Stream | Theme | Chain | Note |
-| --- | --- | --- | --- |
-| A | Ścieżka główna | `F-01` → `F-02` → `S-01` → `S-02` → `S-03` → `S-04` → `S-05` → `S-06` | Najkrótsza droga do potwierdzenia tezy produktu; przy celu „szybkość" to jedyny łańcuch, który musi zamknąć się w całości. |
-| B | Weryfikacja automatyczna | `F-03` | Wchodzi zaraz po `S-01`, żeby każda kolejna pozycja lądowała już przez sprawdzoną bramkę. |
-| C | Pełny cykl życia danych | `S-07` / `S-08` | Dołącza do strumienia A odpowiednio przy `S-04` i `S-05`; obie pozycje można prowadzić równolegle względem siebie. |
-| D | Wsparcie generatywne | `S-09` | Osobno i na końcu — pozycja oznaczona jako nice-to-have, wstrzymana do czasu wyboru dostawcy. |
+| Stream | Theme                    | Chain                                                                 | Note                                                                                                                       |
+| ------ | ------------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| A      | Ścieżka główna           | `F-01` → `F-02` → `S-01` → `S-02` → `S-03` → `S-04` → `S-05` → `S-06` | Najkrótsza droga do potwierdzenia tezy produktu; przy celu „szybkość" to jedyny łańcuch, który musi zamknąć się w całości. |
+| B      | Weryfikacja automatyczna | `F-03`                                                                | Wchodzi zaraz po `S-01`, żeby każda kolejna pozycja lądowała już przez sprawdzoną bramkę.                                  |
+| C      | Pełny cykl życia danych  | `S-07` / `S-08`                                                       | Dołącza do strumienia A odpowiednio przy `S-04` i `S-05`; obie pozycje można prowadzić równolegle względem siebie.         |
+| D      | Wsparcie generatywne     | `S-09`                                                                | Osobno i na końcu — pozycja oznaczona jako nice-to-have, wstrzymana do czasu wyboru dostawcy.                              |
 
 ## Baseline
 
@@ -76,7 +76,7 @@ Stan repozytorium na 2026-08-20.
 - **Wdrożenie / infrastruktura:** brak; konta u dostawców nie są jeszcze założone.
 - **Obserwowalność:** brak i poza zakresem pierwszej wersji.
 - **Obecne:** `context/foundation/{shape-notes,prd,tech-stack}.md`, 25 skilli kursowych
-  w `.claude/skills/`, repozytorium git z trzema commitami.
+  w `.claude/skills/` (lokalnie, poza repozytorium — patrz `.gitignore`), repozytorium git z trzema commitami.
 
 ## Foundations
 
@@ -233,20 +233,20 @@ Stan repozytorium na 2026-08-20.
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID | Suggested issue title | Ready for `/10x-plan` | Notes |
-| --- | --- | --- | --- | --- |
-| F-01 | project-scaffold | Szkielet aplikacji i bramki jakości | tak | `/10x-plan project-scaffold` |
-| F-02 | account-isolation | Konto i izolacja danych między kontami | nie | czeka na konto u dostawcy |
-| F-03 | verification-pipeline | Automatyczna weryfikacja zmian przed scaleniem | nie | czeka na repozytorium zdalne |
-| S-01 | first-sign-in | Pierwsze logowanie i pusta kolejka | nie | po F-02 |
-| S-02 | asset-registry | Rejestr zasobów z ekspozycją i krytycznością | nie | po S-01 |
-| S-03 | priority-visible | Widoczny priorytet ze składnikami i terminem | nie | po S-02; pozycja przewodnia |
-| S-04 | ordered-queue | Kolejka uporządkowana priorytetem | nie | po S-03 |
-| S-05 | decision-trail | Rozstrzygnięcie pozycji z uzasadnieniem | nie | po S-04 |
-| S-06 | reopen-decision | Przywrócenie zamkniętej pozycji | nie | po S-05 |
-| S-07 | exposure-recalc | Przeliczenie kolejki po zmianie ekspozycji | nie | po S-04 |
-| S-08 | safe-removal | Bezpieczne poprawianie i usuwanie wpisów | nie | po S-05 |
-| S-09 | grounded-summary | Streszczenie osadzone we wprowadzonym opisie | nie | wstrzymane do wyboru dostawcy |
+| Roadmap ID | Change ID             | Suggested issue title                          | Ready for `/10x-plan` | Notes                         |
+| ---------- | --------------------- | ---------------------------------------------- | --------------------- | ----------------------------- |
+| F-01       | project-scaffold      | Szkielet aplikacji i bramki jakości            | tak                   | `/10x-plan project-scaffold`  |
+| F-02       | account-isolation     | Konto i izolacja danych między kontami         | nie                   | czeka na konto u dostawcy     |
+| F-03       | verification-pipeline | Automatyczna weryfikacja zmian przed scaleniem | nie                   | czeka na repozytorium zdalne  |
+| S-01       | first-sign-in         | Pierwsze logowanie i pusta kolejka             | nie                   | po F-02                       |
+| S-02       | asset-registry        | Rejestr zasobów z ekspozycją i krytycznością   | nie                   | po S-01                       |
+| S-03       | priority-visible      | Widoczny priorytet ze składnikami i terminem   | nie                   | po S-02; pozycja przewodnia   |
+| S-04       | ordered-queue         | Kolejka uporządkowana priorytetem              | nie                   | po S-03                       |
+| S-05       | decision-trail        | Rozstrzygnięcie pozycji z uzasadnieniem        | nie                   | po S-04                       |
+| S-06       | reopen-decision       | Przywrócenie zamkniętej pozycji                | nie                   | po S-05                       |
+| S-07       | exposure-recalc       | Przeliczenie kolejki po zmianie ekspozycji     | nie                   | po S-04                       |
+| S-08       | safe-removal          | Bezpieczne poprawianie i usuwanie wpisów       | nie                   | po S-05                       |
+| S-09       | grounded-summary      | Streszczenie osadzone we wprowadzonym opisie   | nie                   | wstrzymane do wyboru dostawcy |
 
 ## Open Roadmap Questions
 

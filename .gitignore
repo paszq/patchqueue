@@ -38,3 +38,9 @@ pnpm-debug.log*
 # testy
 test-results/
 playwright-report/
+
+# Narzedzia agenta i material kursowy 10xDevs.
+# Zostaja lokalnie i dzialaja tak samo, ale nie sa publikowane: .claude/skills
+# to toolkit kursu, a .claude/commands to prompty z lekcji - czyli tresc, ktorej
+# warunkow redystrybucji nie ustalono. Usuniete ze sledzenia 2026-09-07.
+.claude/
