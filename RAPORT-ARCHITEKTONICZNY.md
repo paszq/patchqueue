@@ -95,13 +95,13 @@ i przeszłaby także po usunięciu migracji.
 
 ## Co z tego wykonano
 
-- **Rozstrzygnięcie jako jedna operacja atomowa** (`bf9e5af`) — dwa zapisy przeniesione do
+- **Rozstrzygnięcie jako jedna operacja atomowa** (`d9156ed`) — dwa zapisy przeniesione do
   funkcji w bazie, w jednej transakcji.
-- **Podział warstwy danych wzdłuż pojęć domenowych** (`5cca7b1`) — 335 linii i 14 funkcji
+- **Podział warstwy danych wzdłuż pojęć domenowych** (`1464efc`) — 335 linii i 14 funkcji
   rozdzielone bez dotykania dziewięciu modułów zależnych, dzięki zachowaniu punktu wejścia.
-- **Agregat „zasób wraz ze swoimi pozycjami"** (`5e7cb74`) — sprowadza niezmienniki całości
+- **Agregat „zasób wraz ze swoimi pozycjami"** (`10f9501`) — sprowadza niezmienniki całości
   do kodu domenowego, nie zabierając bazie roli ostatecznego strażnika.
-- **Reguła unikalności pozycji** (`95450be`, `58a6b5c`) — trzecie wystąpienie wzorca,
+- **Reguła unikalności pozycji** (`9d242a9`, `02e1506`) — trzecie wystąpienie wzorca,
   domknięte migracją i tłumaczeniem odmowy na język produktu.
 
 ## Co świadomie zostawiono

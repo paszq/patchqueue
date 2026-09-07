@@ -54,7 +54,7 @@ zapisu. Nie chroni przed zapisem, który nigdy nie powinien powstać — **infer
 
 ### Intencjonalność
 
-**Przypadkowa złożoność.** Kod powstał w jednym commicie `721dace` obejmującym całą
+**Przypadkowa złożoność.** Kod powstał w jednym commicie `e5774fb` obejmującym całą
 ścieżkę główną — **evidence**, `git log` po tym pliku zwraca jeden wpis. W żadnym
 dokumencie kontekstowym nie pada słowo o transakcyjności ani spójności zapisu —
 **evidence**, grep po `context/`. Nie ma śladu decyzji „świadomie rezygnujemy z

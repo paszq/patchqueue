@@ -14,7 +14,7 @@ last_updated_by: Krystian Paszek
 # Research: ścieżka wczytywania znalezisk z zewnętrznych źródeł
 
 **Data**: 2026-09-02, 21:40 (+02:00)
-**Commit**: `d94df1b`
+**Commit**: `c34df14`
 **Gałąź**: `main`
 **Repozytorium**: `paszq/patchqueue`
 
@@ -160,7 +160,7 @@ stronie.
 **Inference.** To nie są dwa osobne niedopatrzenia, tylko **jeden wzorzec**: reguły
 dotyczące pozycji zostały zapisane tam, gdzie były potrzebne po raz pierwszy — w warstwie
 tłumaczącej obce formaty — zamiast tam, gdzie definiuje się pozycję. Ścieżka ręczna
-powstała wcześniej (`721dace`, cała ścieżka główna) i nigdy nie została do nich
+powstała wcześniej (`e5774fb`, cała ścieżka główna) i nigdy nie została do nich
 doprowadzona. Zmiana `duplicate-items` naprawiła jedną z dwóch; druga stoi otwarta.
 
 ### 4. Co w tej ścieżce jest zrobione dobrze
@@ -171,7 +171,7 @@ Uczciwość badania wymaga odnotowania tego, co się broni — **evidence**.
   skanera ma kolumny, biuletyn myślniki, a lista bywa gołymi identyfikatorami. Warstwa
   danych i widok nie znają nawet liczby formatów.
 - **Parsowanie jest czyste** — bez bazy, HTTP i zegara — więc 28 testów pokrywa je tabelą
-  przypadków zamiast klikaniem. Trzy z nich złapały prawdziwe błędy (commit `0bab983`):
+  przypadków zamiast klikaniem. Trzy z nich złapały prawdziwe błędy (commit `3face93`):
   separator wykrywany osobno w każdym wierszu rozjeżdżał się z nagłówkiem przy ocenie
   zapisanej przecinkiem; myślnik wewnątrz identyfikatora powodował branie gołej listy za
   biuletyn; ocena `"-1"` była czyszczona do `1`.
