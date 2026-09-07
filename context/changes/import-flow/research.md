@@ -1,7 +1,7 @@
 ---
 date: 2026-09-02T21:40:00+02:00
 researcher: Krystian Paszek (z Claude Opus 5)
-git_commit: 9af529b
+git_commit: 515a131
 branch: main
 repository: paszq/patchqueue
 topic: "Ścieżka wczytywania znalezisk z zewnętrznych źródeł — gdzie mieszka decyzja, co się dzieje przy błędzie, czego brakuje po drugiej stronie"
@@ -14,7 +14,7 @@ last_updated_by: Krystian Paszek
 # Research: ścieżka wczytywania znalezisk z zewnętrznych źródeł
 
 **Data**: 2026-09-02, 21:40 (+02:00)
-**Commit**: `9af529b`
+**Commit**: `515a131`
 **Gałąź**: `main`
 **Repozytorium**: `paszq/patchqueue`
 
@@ -160,7 +160,7 @@ stronie.
 **Inference.** To nie są dwa osobne niedopatrzenia, tylko **jeden wzorzec**: reguły
 dotyczące pozycji zostały zapisane tam, gdzie były potrzebne po raz pierwszy — w warstwie
 tłumaczącej obce formaty — zamiast tam, gdzie definiuje się pozycję. Ścieżka ręczna
-powstała wcześniej (`e5774fb`, cała ścieżka główna) i nigdy nie została do nich
+powstała wcześniej (`1a40edf`, cała ścieżka główna) i nigdy nie została do nich
 doprowadzona. Zmiana `duplicate-items` naprawiła jedną z dwóch; druga stoi otwarta.
 
 ### 4. Co w tej ścieżce jest zrobione dobrze
@@ -171,7 +171,7 @@ Uczciwość badania wymaga odnotowania tego, co się broni — **evidence**.
   skanera ma kolumny, biuletyn myślniki, a lista bywa gołymi identyfikatorami. Warstwa
   danych i widok nie znają nawet liczby formatów.
 - **Parsowanie jest czyste** — bez bazy, HTTP i zegara — więc 28 testów pokrywa je tabelą
-  przypadków zamiast klikaniem. Trzy z nich złapały prawdziwe błędy (commit `3face93`):
+  przypadków zamiast klikaniem. Trzy z nich złapały prawdziwe błędy (commit `958bf07`):
   separator wykrywany osobno w każdym wierszu rozjeżdżał się z nagłówkiem przy ocenie
   zapisanej przecinkiem; myślnik wewnątrz identyfikatora powodował branie gołej listy za
   biuletyn; ocena `"-1"` była czyszczona do `1`.
@@ -226,7 +226,7 @@ asymetrii — walidacja kształtu identyfikatora powinna wejść do miejsca wsp�
 - `context/domain/01-domain-distillation.md` — klasyfikuje tłumaczenie obcych formatów jako
   subdomenę **wspierającą**; niniejsze badanie tego nie podważa, ale pokazuje, że reguły
   o pozycji przeciekły do subdomeny wspierającej z subdomeny rdzeniowej
-- `commit 3face93` — wprowadzenie warstwy tłumaczącej wraz z opisem trzech błędów złapanych
+- `commit 958bf07` — wprowadzenie warstwy tłumaczącej wraz z opisem trzech błędów złapanych
   przez testy tabelaryczne
 
 ## Pytania otwarte

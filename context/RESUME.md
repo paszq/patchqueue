@@ -52,9 +52,9 @@ i sprawdzone na produkcji:
 
 | Zmiana                                     | Commit    | Dlaczego to nie kosmetyka                                                                                                                                                                                          |
 | ------------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Dowód załatania w historii rozstrzygnięć   | `90139f4` | Domyka **FR-015** (must-have): zamknięta pozycja miała pokazywać rozstrzygnięcie _wraz z uzasadnieniem_, a przy załataniu nie było pola, w które dałoby się je wpisać. Wymaganie było spełnione tylko dla odrzuceń |
-| Wczytywanie z załączonego pliku            | `c28904d` | Plik i pole tekstowe idą tą samą ścieżką — załącznik to inny sposób dostarczenia tekstu, nie drugi tor do utrzymania                                                                                               |
-| Liczba otwartych pozycji na liście zasobów | `c1158f9` | Lista pokazywała, co wpływa na priorytet, ale nie ile pracy na zasobie czeka                                                                                                                                       |
+| Dowód załatania w historii rozstrzygnięć   | `cd18a0b` | Domyka **FR-015** (must-have): zamknięta pozycja miała pokazywać rozstrzygnięcie _wraz z uzasadnieniem_, a przy załataniu nie było pola, w które dałoby się je wpisać. Wymaganie było spełnione tylko dla odrzuceń |
+| Wczytywanie z załączonego pliku            | `8311c27` | Plik i pole tekstowe idą tą samą ścieżką — załącznik to inny sposób dostarczenia tekstu, nie drugi tor do utrzymania                                                                                               |
+| Liczba otwartych pozycji na liście zasobów | `12beea1` | Lista pokazywała, co wpływa na priorytet, ale nie ile pracy na zasobie czeka                                                                                                                                       |
 
 Dowód załatania został **nieobowiązkowy**. „Odrzucenie bez powodu jest niemożliwe" to
 zapisana reguła domenowa; przymus przy załataniu byłby regułą nową, której w PRD nie
@@ -65,7 +65,7 @@ ma — do rozstrzygnięcia produktowego, nie do dopisania przy okazji.
 Najmocniejszy wątek, wart opisania osobno: **pięć razy w tym projekcie zielony wynik
 znaczył „nie sprawdziłem", nie „jest dobrze"**.
 
-1. Testy izolacji kont pomijane w pipelinie — krok nie dostawał sekretów (commit `93d0108`)
+1. Testy izolacji kont pomijane w pipelinie — krok nie dostawał sekretów (commit `9cf0d38`)
 2. Testy przeglądowe pomijane lokalnie — konfiguracja Playwrighta nie czytała `.env`
 3. `dependency-cruiser` nie parsował `.astro` — „zero naruszeń" przy połowie systemu poza grafem
 4. `ast-grep` zwracał zero przy funkcjach mapujących — wzorzec nie obsługuje częściowych nazw

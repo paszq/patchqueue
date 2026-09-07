@@ -3,7 +3,7 @@ change_id: refactor-opportunities
 created: 2026-08-21
 last_updated: 2026-08-21
 tags: [research, architektura, verified]
-verified_at_commit: 86fb76a
+verified_at_commit: f291511
 inputs:
   - context/map/repo-map.md
   - context/map/artifact-2-structure.md
@@ -54,7 +54,7 @@ zapisu. Nie chroni przed zapisem, który nigdy nie powinien powstać — **infer
 
 ### Intencjonalność
 
-**Przypadkowa złożoność.** Kod powstał w jednym commicie `e5774fb` obejmującym całą
+**Przypadkowa złożoność.** Kod powstał w jednym commicie `1a40edf` obejmującym całą
 ścieżkę główną — **evidence**, `git log` po tym pliku zwraca jeden wpis. W żadnym
 dokumencie kontekstowym nie pada słowo o transakcyjności ani spójności zapisu —
 **evidence**, grep po `context/`. Nie ma śladu decyzji „świadomie rezygnujemy z
