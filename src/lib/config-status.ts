@@ -13,7 +13,9 @@ export const configStatuses: ConfigStatus[] = [
     name: "Supabase",
     configured: Boolean(SUPABASE_URL && SUPABASE_KEY),
     message: "Supabase nie jest skonfigurowany — funkcje uwierzytelniania są wyłączone.",
-    docsUrl: "https://github.com/przeprogramowani/10x-astro-starter#supabase-configuration",
+    // Wlasna instrukcja, nie startera: tamta twierdzi, ze migracje nie sa
+    // potrzebne, a ten produkt ma trzy tabele i cztery migracje.
+    docsUrl: "https://github.com/paszq/patchqueue#baza",
     docsLabel: "Zobacz instrukcję konfiguracji",
   },
 ];
