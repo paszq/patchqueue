@@ -10,7 +10,7 @@ Ostatnia aktualizacja: 2026-09-02 (wieczór)
 | Repozytorium         | https://github.com/paszq/patchqueue                     |
 | Aplikacja            | https://patchqueue.paszekkrystian-19.workers.dev        |
 | Baza i logowanie     | Supabase, projekt `patchqueue` (`uokarnfdgmszlwshvoph`) |
-| Konto demonstracyjne | `demo@example.com` / `Demo12345!`                       |
+| Konto demonstracyjne | `demo@example.com` — hasło poza repozytorium            |
 
 ## Stan na dziś
 

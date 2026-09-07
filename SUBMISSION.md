@@ -9,7 +9,7 @@ termin. To odróżnia produkt od arkusza posortowanego po ocenie CVSS.
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | Aplikacja            | https://patchqueue.paszekkrystian-19.workers.dev                                                                       |
 | Repozytorium         | https://github.com/paszq/patchqueue                                                                                    |
-| Konto demonstracyjne | `demo@example.com` / `Demo12345!`                                                                                      |
+| Konto demonstracyjne | `demo@example.com` — hasło podane w formularzu zgłoszeniowym                                                           |
 | Stan                 | 52 commity, 83 testy jednostkowe i integracyjne, 16 przeglądowych, pipeline zielony wraz z agentem przeglądającym PR-y |
 
 ### Ścieżka do przeklikania (2 minuty)
