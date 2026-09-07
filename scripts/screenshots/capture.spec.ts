@@ -19,7 +19,7 @@ test("zrzuty ekranu do zgłoszenia", async ({ page }) => {
 
   // 1. Strona wejściowa — pierwsze, co widzi ktoś, kto zna tylko adres
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /Ta sama podatność/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Ta sama podatność/ })).toBeVisible();
   await page.waitForLoadState("networkidle");
   await page.screenshot({ path: `${DIR}/00-strona-wejsciowa.png`, fullPage: true });
 
