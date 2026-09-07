@@ -8,7 +8,7 @@
 >
 > Last updated: 2026-09-02
 
-## 1. Strategy
+## 1. Strategia
 
 Testy w tym projekcie podlegają trzem regułom, od których nie ma odstępstwa:
 
@@ -29,7 +29,7 @@ Testy w tym projekcie podlegają trzem regułom, od których nie ma odstępstwa:
 Zasięg skanu punktów zapalnych użyty do ważenia prawdopodobieństwa: `src/`,
 `supabase/`, `e2e/`, `tests/`.
 
-## 2. Risk Map
+## 2. Mapa ryzyka
 
 Najważniejsze scenariusze awarii, przed którymi produkt musi się bronić, uporządkowane
 według wpływu × prawdopodobieństwa. Ryzyka są opisane językiem użytkownika i biznesu,
@@ -65,7 +65,7 @@ odnotowane zamiast dopychania mapy.
 | #6     | Nieudany drugi zapis wycofuje pierwszy; historia i stan pozycji nigdy nie rozchodzą się trwale                           | Że kolejność zapisów chroni sama z siebie — chroni do pierwszej awarii między nimi                                           | Granica transakcji, kontekst wywołania, zachowanie przy odrzuceniu po stronie bazy                       | integracyjna                    | Wywoływanie usterki wyłącznie przez publiczne API, które nie potrafi jej wywołać         |
 | #7     | Wiersz niezrozumiały zostaje odrzucony z powodem i numerem linii, a żądanie kończy się czytelnym komunikatem, nie awarią | Że walidacja formularza wystarcza — plik omija formularz i wchodzi tą samą ścieżką                                           | Gdzie kończy się parsowanie, a zaczyna zapis; jakie ograniczenia rozmiaru i typu obowiązują realnie      | jednostkowa + integracyjna      | Testowanie wyłącznie poprawnych plików, bez wiersza uszkodzonego, pustego i nadmiarowego |
 
-## 3. Phased Rollout
+## 3. Przekroje wdrożenia
 
 Każdy wiersz to odrębny przekrój wdrożenia, który otwiera własny folder zmiany przez
 `/10x-new`. Status przesuwa się w prawo według słownika poniżej.
@@ -82,8 +82,9 @@ wcześniej, a plan przypisuje je wstecz do nazwanych ryzyk. Ich foldery zmian za
 | 4   | Guardraile w bazie sprawdzane po migracji | Odróżnić odmowę przez regułę od odmowy przez brak reguły, dla każdego guardrailu | #2     | integracyjne                             | not started | —                                                                        |
 | 5   | Odporność wczytywania z obcych źródeł     | Nie zgubić ani nie dopisać znaleziska bez śladu w podsumowaniu                   | #1, #7 | jednostkowe + integracyjne               | not started | —                                                                        |
 
-**Status vocabulary** (fixed — parser literals): `not started` → `change opened` →
-`researched` → `planned` → `implementing` → `complete`.
+**Stany przekroju**, w kolejności: `not started` → `change opened` → `researched` →
+`planned` → `implementing` → `complete`. Nazwy zostają po angielsku, bo są odczytywane
+maszynowo przy odświeżaniu planu.
 
 ## 4. Stack
 
@@ -103,7 +104,7 @@ wcześniej, a plan przypisuje je wstecz do nazwanych ryzyk. Ich foldery zmian za
 - Runtime/browser: Playwright dostępny lokalnie jako warstwa weryfikacji, także przeciw wdrożonej instancji; checked: 2026-09-02
 - Provider/platform: GitHub Actions jako miejsce bramek; `gh` niezainstalowany, więc status przebiegów odczytywany z interfejsu, nie z terminala; Supabase jako źródło reguł egzekwowanych w bazie; checked: 2026-09-02
 
-## 5. Quality Gates
+## 5. Bramki jakości
 
 | Bramka                              | Gdzie           | Wymagana?                              | Co łapie                                         |
 | ----------------------------------- | --------------- | -------------------------------------- | ------------------------------------------------ |
@@ -115,7 +116,7 @@ wcześniej, a plan przypisuje je wstecz do nazwanych ryzyk. Ich foldery zmian za
 | weryfikacja wdrożonej instancji     | CI po wdrożeniu | wymagana                               | awarie widoczne dopiero w środowisku docelowym   |
 | przegląd implementacji przez agenta | CI na PR        | planowana — wymaga `ANTHROPIC_API_KEY` | dryf implementacji względem planu                |
 
-## 6. Cookbook Patterns
+## 6. Kucharka: jak dodawać testy
 
 ### 6.1 Test reguły domenowej
 
@@ -163,7 +164,7 @@ wcześniej, a plan przypisuje je wstecz do nazwanych ryzyk. Ich foldery zmian za
   Pięć przypadków cichego pomijania testów opisanych w `SUBMISSION.md` to materiał
   źródłowy dla ryzyka #3 i dla §6.5.
 
-## 7. What We Deliberately Don't Test
+## 7. Czego świadomie nie testujemy
 
 Brak wykluczeń. Na pytanie o negatywną przestrzeń (wywiad Q5) padła odpowiedź „testuj
 wszystko, co ryzykowne" — o zakresie decyduje mapa ryzyka z §2, a nie lista obszarów
@@ -174,7 +175,7 @@ wymaga najpierw wykazania, że dane ryzyko nie mieści się w §2 — a nie odwr
 Kandydatem do ponownego rozważenia jest wydajność kolejki przy stu i więcej pozycjach:
 guardrail istnieje w `prd.md`, ale odpowiedzią na niego jest obserwowalność, nie test.
 
-## 8. Freshness Ledger
+## 8. Data ważności dokumentu
 
 - Strategia (§1–§5) ostatnio przeglądana: 2026-09-02
 - Wersje narzędzi ostatnio zweryfikowane: 2026-09-02
