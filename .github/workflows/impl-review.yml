@@ -18,22 +18,17 @@
 # the affected list into the prompt's Context block. That's an additive
 # optimization, not required for correctness.
 #
-# WYMAGANIE WSTEPNE: `.claude/skills/10x-impl-review-ci/` musi byc W REPOZYTORIUM,
-# bo krok "Stage impl-review-ci skill" pobiera go przez `git archive` z galezi
-# bazowej. W tym repozytorium katalog `.claude/` jest CELOWO nieprzechowywany
-# (patrz .gitignore) - to material kursowy, ktorego nie publikujemy. Skutek:
-# ten workflow nie ruszy, dopoki skill nie zostanie wgrany z powrotem.
+# WYMAGANIA WSTEPNE. Krok "Stage impl-review-ci skill" pobiera skilla przez
+# `git archive` z galezi bazowej, wiec `.claude/skills/10x-impl-review-ci/`
+# musi byc obecny w repozytorium. Katalog `.claude/` nie jest wersjonowany
+# (patrz .gitignore), wiec przed uruchomieniem trzeba go tam umiescic.
 #
-# To swiadomy kompromis, nie usterka. Przeplyw zostal uruchomiony i udowodniony
-# na PR #1 - trzy przebiegi, dwa ustalenia znalezione przez agenta i zamkniete,
-# komentarze i raporty zostaja w historii repozytorium. Zeby uruchomic go
-# ponownie: przywroc `.claude/skills/10x-impl-review-ci/` do repozytorium i
-# ustaw sekret ANTHROPIC_API_KEY.
-#
-# Pozostale wymagania, wykryte przy pierwszym prawdziwym uruchomieniu i latwe do
-# przeoczenia: uprawnienie `id-token: write` (jest nizej), aplikacja GitHub
-# "Claude" zainstalowana w repozytorium oraz klucz API zwiazany z przestrzenia
-# robocza, a nie z tozsamoscia.
+# Poza tym potrzebne sa trzy rzeczy, ktore latwo przeoczyc, bo kazda ujawnia
+# sie dopiero przy prawdziwym przebiegu: uprawnienie `id-token: write` (jest
+# nizej w tym pliku), aplikacja GitHub "Claude" zainstalowana w repozytorium
+# oraz sekret ANTHROPIC_API_KEY z kluczem zwiazanym z przestrzenia robocza,
+# a nie z tozsamoscia - klucz identity-linked wymaga dodatkowego naglowka,
+# ktorego akcja nie wysyla.
 
 name: Impl Review
 

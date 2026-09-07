@@ -76,7 +76,7 @@ Stan repozytorium na 2026-08-20.
 - **Wdrożenie / infrastruktura:** brak; konta u dostawców nie są jeszcze założone.
 - **Obserwowalność:** brak i poza zakresem pierwszej wersji.
 - **Obecne:** `context/foundation/{shape-notes,prd,tech-stack}.md`, 25 skilli kursowych
-  w `.claude/skills/` (lokalnie, poza repozytorium — patrz `.gitignore`), repozytorium git z trzema commitami.
+  w `.claude/skills/`, repozytorium git z trzema commitami.
 
 ## Foundations
 
