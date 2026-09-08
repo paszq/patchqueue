@@ -12,7 +12,7 @@ if (existsSync(".env")) {
  */
 export default defineConfig({
   testDir: "./scripts/screenshots",
-  testMatch: "champion.spec.ts",
+  testMatch: ["champion.spec.ts", "testy.spec.ts"],
   fullyParallel: false,
   workers: 1,
   reporter: "list",
