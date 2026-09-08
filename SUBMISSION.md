@@ -139,7 +139,7 @@ sprzężenie z jednym dostawcą jako zaakceptowane ryzyko, więc nie ma tu rozja
 intencja-vs-kod, jest dług, którego koszt został wyceniony.
 Commity: `dae345f`, `a29d7eb`.
 
-**Raport architektoniczny** — `RAPORT-ARCHITEKTONICZNY.md`, dowód dla tego bloku. Składa
+**Raport architektoniczny** — `context/architect-report.md`, dowód dla tego bloku. Składa
 cztery artefakty w jedną odpowiedź na pytanie, gdzie mieszka wiedza o produkcie. Wątek
 przewodni, w który wszystkie cztery badania trafiły niezależnie: **reguła dotycząca pozycji
 zostaje zapisana tam, gdzie po raz pierwszy była potrzebna, a nie tam, gdzie pozycja jest
@@ -381,7 +381,7 @@ Uzasadnienie: `context/changes/atomic-decisions/change.md`, naprawa: `c8dbaed`.
 | `context/foundation/shape-notes.md`          | dlaczego produkt wygląda tak, a nie inaczej        |
 | `context/foundation/test-plan.md`            | mapa ryzyka i kucharka testów                      |
 | `context/foundation/fr-audit.md`             | audyt wszystkich wymagań względem kodu             |
-| `RAPORT-ARCHITEKTONICZNY.md`                 | raport bloku Architect, składa cztery artefakty    |
+| `context/architect-report.md`                | raport bloku Architect, składa cztery artefakty    |
 | `docs/screenshots/`                          | zrzuty aplikacji i pipeline'u do formularzy        |
 | `context/map/repo-map.md`                    | mapa repozytorium z jawnym zasięgiem pomiaru       |
 | `context/domain/01-domain-distillation.md`   | pojęcia, subdomeny, niezmienniki                   |

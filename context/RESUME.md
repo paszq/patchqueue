@@ -29,10 +29,10 @@ agent przeglądający PR-y uruchomiony i sprawdzony na prawdziwym PR, produkcja 
 **Zostało wyłącznie wysłanie dwóch formularzy.** Termin: **14 września 2026**.
 Obie wysyłki muszą pójść w tym samym terminie — dosłać później się nie da.
 
-| Formularz            | Adres                                                               | Co załączyć                                                         |
-| -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| Builder              | https://baserow.io/form/g6rJ-njiGpV5lPxvot6iRxsXTh8Wb-AnRjy7s2Zck1c | link do repozytorium, zrzuty z `docs/screenshots/`                  |
-| Architect + Champion | https://baserow.io/form/fwnBioduXc90QTli6lsCVL_YgRdTECPTCmwiVhu8d-E | `RAPORT-ARCHITEKTONICZNY.md`, zrzuty z `docs/screenshots/champion/` |
+| Formularz            | Adres                                                               | Co załączyć                                                          |
+| -------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Builder              | https://baserow.io/form/g6rJ-njiGpV5lPxvot6iRxsXTh8Wb-AnRjy7s2Zck1c | link do repozytorium, zrzuty z `docs/screenshots/`                   |
+| Architect + Champion | https://baserow.io/form/fwnBioduXc90QTli6lsCVL_YgRdTECPTCmwiVhu8d-E | `context/architect-report.md`, zrzuty z `docs/screenshots/champion/` |
 
 Treść merytoryczna zgłoszenia leży w `SUBMISSION.md`, po sekcji na blok.
 
@@ -122,7 +122,7 @@ BASE_URL=https://patchqueue.paszekkrystian-19.workers.dev npx playwright test   
 | `context/domain/01-domain-distillation.md`   | pojęcia, subdomeny, niezmienniki                                  |
 | `context/domain/03-anti-corruption-layer.md` | plan odcięcia od dostawcy (niewykonany, świadomie)                |
 | `SUBMISSION.md`                              | treść zgłoszenia — sekcja na blok, odnośniki do plików i commitów |
-| `RAPORT-ARCHITEKTONICZNY.md`                 | raport bloku Architect, składa cztery artefakty modułu 4          |
+| `context/architect-report.md`                | raport bloku Architect, składa cztery artefakty modułu 4          |
 | `context/changes/import-flow/research.md`    | research wybranej funkcji (artefakt L3)                           |
 | `context/changes/*/`                         | po jednym folderze na zmianę, z uzasadnieniami                    |
 | `CLAUDE.md`                                  | komendy, konwencje, reguły domenowe dla agenta                    |

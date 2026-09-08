@@ -141,7 +141,7 @@ context/               # dokumenty projektu (poniżej)
 | [`context/foundation/fr-audit.md`](./context/foundation/fr-audit.md)   | audyt wszystkich wymagań względem kodu                     |
 | [`context/map/repo-map.md`](./context/map/repo-map.md)                 | mapa repozytorium z jawnym zasięgiem pomiaru               |
 | [`context/domain/`](./context/domain/)                                 | destylacja domeny, niezmienniki, plan odcięcia od dostawcy |
-| [`RAPORT-ARCHITEKTONICZNY.md`](./RAPORT-ARCHITEKTONICZNY.md)           | co pokazały cztery badania architektoniczne                |
+| [`context/architect-report.md`](./context/architect-report.md)         | co pokazały cztery badania architektoniczne                |
 | [`CLAUDE.md`](./CLAUDE.md)                                             | komendy, konwencje i reguły domenowe dla agenta            |
 
 Projekt zaliczeniowy 10xDevs 3.0.
