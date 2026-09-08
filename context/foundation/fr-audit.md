@@ -1,6 +1,6 @@
 # Audyt wymagań FR-001…FR-017 względem kodu i testów
 
-**Data**: 2026-09-02 · **Commit**: `5d21554` · **Metoda**: każde wymaganie sprawdzone
+**Data**: 2026-09-02 · **Commit**: `887b834` · **Metoda**: każde wymaganie sprawdzone
 osobno w kodzie, a tam gdzie to możliwe — odtworzone w działającej aplikacji.
 
 Powód powstania: przy domykaniu zgłoszenia certyfikacyjnego okazało się, że **FR-015 był
@@ -28,7 +28,7 @@ opisana na końcu, poza tabelą, bo nie jest naruszeniem żadnego FR.
 | 001 | Założenie konta e-mailem i hasłem                                              | ✅      | `api/auth/signup.ts`; używane przez wszystkie 16 testów przeglądowych                                                                                |
 | 002 | Logowanie i wylogowanie                                                        | ✅      | `api/auth/{signin,signout}.ts`, przycisk w `AppShell.astro:47-52`; test „logowanie działa, gdy pola wypełnia autouzupełnianie"                       |
 | 003 | Rejestracja zasobu: nazwa, komponent z wersją, ekspozycja, krytyczność         | ✅      | formularz `assets/index.astro`; helper `addAsset` w testach przeglądowych                                                                            |
-| 004 | Przeglądanie listy zasobów                                                     | ✅      | `assets/index.astro`; od `da3e734` także liczba otwartych pozycji                                                                                    |
+| 004 | Przeglądanie listy zasobów                                                     | ✅      | `assets/index.astro`; od `076db79` także liczba otwartych pozycji                                                                                    |
 | 005 | Zmiana danych zasobu, w tym ekspozycji                                         | ✅      | `assets/[id].astro:195-205`                                                                                                                          |
 | 006 | Odmowa usunięcia zasobu z otwartymi pozycjami, ze wskazaniem blokujących       | ✅      | wyzwalacz `refuse_asset_delete_with_open_items`; test „zasobu z otwartą pozycją nie da się usunąć" sprawdza, że komunikat **wymienia identyfikator** |
 | 007 | Dopisanie podatności: identyfikator, ocena, opis                               | ✅      | formularz `assets/[id].astro`; helper `addVulnerability`                                                                                             |
@@ -39,7 +39,7 @@ opisana na końcu, poza tabelą, bo nie jest naruszeniem żadnego FR.
 | 012 | Kolejka wg priorytetu, oznaczenie po terminie z liczbą dni                     | ✅      | `queue.astro:47,111`; test „kolejka układa się inaczej niż sortowanie po samej ocenie CVSS"; `priority.test.ts` pokrywa stan po terminie             |
 | 013 | Zamknięcie pozycji jako załatanej                                              | ✅      | test „od pustej kolejki do rozstrzygniętej pozycji"                                                                                                  |
 | 014 | Odrzucenie z podaniem powodu                                                   | ✅      | ograniczenie `decisions_rejection_needs_reason`; test „odrzucenie bez powodu nie przechodzi"                                                         |
-| 015 | Powrót do zamkniętej pozycji i zobaczenie rozstrzygnięcia wraz z uzasadnieniem | ✅      | **domknięte 2026-09-02** commitem `d71aff5`; test „dowód załatania trafia do historii i zostaje tam po przywróceniu"                                 |
+| 015 | Powrót do zamkniętej pozycji i zobaczenie rozstrzygnięcia wraz z uzasadnieniem | ✅      | **domknięte 2026-09-02** commitem `9cfbc1b`; test „dowód załatania trafia do historii i zostaje tam po przywróceniu"                                 |
 | 016 | Przywrócenie do kolejki; poprzednie rozstrzygnięcie zostaje w historii         | ✅      | funkcja `record_decision`; test przywrócenia sprawdza, że wcześniejszy wpis nie znika                                                                |
 | 017 | Streszczenie prostym językiem i propozycja kroków naprawczych                  | —       | **nice-to-have**, świadomie poza MVP: `shape-notes.md` §Non-Goals wyklucza wsparcie generatywne z zakresu zaliczeniowego                             |
 

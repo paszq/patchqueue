@@ -219,22 +219,22 @@ w `role="alert"` i dokładnie jednej pozycji o tym identyfikatorze na zasobie.
 
 #### Automated
 
-- [x] 1.1 Migracja z unikalnym indeksem na (asset_id, upper(identifier)) — 121df71
-- [x] 1.2 Test integracyjny odróżniający odmowę przez regułę od braku reguły — 121df71
-- [x] 1.3 Bramki jakości przechodzą po zastosowaniu migracji — 121df71
+- [x] 1.1 Migracja z unikalnym indeksem na (asset_id, upper(identifier)) — 285201a
+- [x] 1.2 Test integracyjny odróżniający odmowę przez regułę od braku reguły — 285201a
+- [x] 1.3 Bramki jakości przechodzą po zastosowaniu migracji — 285201a
 
 #### Manual
 
-- [x] 1.4 Test czerwony przed migracją, zielony po niej — 121df71
+- [x] 1.4 Test czerwony przed migracją, zielony po niej — 285201a
 
 ### Phase 2: Tłumaczenie odmowy w warstwie aplikacji
 
 #### Automated
 
-- [x] 2.1 Normalizacja identyfikatora na ścieżce ręcznej — a75111c
-- [x] 2.2 Naruszenie unikalności zamienione na komunikat w języku produktu — a75111c
-- [x] 2.3 Test przeglądowy ścieżki użytkownika — a75111c
-- [x] 2.4 Bramki jakości i testy przeglądowe przechodzą — a75111c
+- [x] 2.1 Normalizacja identyfikatora na ścieżce ręcznej — 9c679a7
+- [x] 2.2 Naruszenie unikalności zamienione na komunikat w języku produktu — 9c679a7
+- [x] 2.3 Test przeglądowy ścieżki użytkownika — 9c679a7
+- [x] 2.4 Bramki jakości i testy przeglądowe przechodzą — 9c679a7
 
 #### Manual
 
