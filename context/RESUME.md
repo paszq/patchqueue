@@ -52,9 +52,9 @@ i sprawdzone na produkcji:
 
 | Zmiana                                     | Commit    | Dlaczego to nie kosmetyka                                                                                                                                                                                          |
 | ------------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Dowód załatania w historii rozstrzygnięć   | `cd18a0b` | Domyka **FR-015** (must-have): zamknięta pozycja miała pokazywać rozstrzygnięcie _wraz z uzasadnieniem_, a przy załataniu nie było pola, w które dałoby się je wpisać. Wymaganie było spełnione tylko dla odrzuceń |
-| Wczytywanie z załączonego pliku            | `8311c27` | Plik i pole tekstowe idą tą samą ścieżką — załącznik to inny sposób dostarczenia tekstu, nie drugi tor do utrzymania                                                                                               |
-| Liczba otwartych pozycji na liście zasobów | `12beea1` | Lista pokazywała, co wpływa na priorytet, ale nie ile pracy na zasobie czeka                                                                                                                                       |
+| Dowód załatania w historii rozstrzygnięć   | `d71aff5` | Domyka **FR-015** (must-have): zamknięta pozycja miała pokazywać rozstrzygnięcie _wraz z uzasadnieniem_, a przy załataniu nie było pola, w które dałoby się je wpisać. Wymaganie było spełnione tylko dla odrzuceń |
+| Wczytywanie z załączonego pliku            | `b6fb3bb` | Plik i pole tekstowe idą tą samą ścieżką — załącznik to inny sposób dostarczenia tekstu, nie drugi tor do utrzymania                                                                                               |
+| Liczba otwartych pozycji na liście zasobów | `da3e734` | Lista pokazywała, co wpływa na priorytet, ale nie ile pracy na zasobie czeka                                                                                                                                       |
 
 Dowód załatania został **nieobowiązkowy**. „Odrzucenie bez powodu jest niemożliwe" to
 zapisana reguła domenowa; przymus przy załataniu byłby regułą nową, której w PRD nie

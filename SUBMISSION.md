@@ -67,7 +67,7 @@ załatania**, trafiający do tej samej niezmienialnej historii, a historia podpi
 zależnie od rodzaju — Dowód, Powód, Uzasadnienie. Dowód pozostaje nieobowiązkowy:
 przymus przy odrzuceniu jest zapisaną regułą domenową, przy załataniu nie ma go w PRD i
 nie został dopisany bez decyzji produktowej.
-Commit: `cd18a0b`.
+Commit: `d71aff5`.
 
 **Izolacja kont wymuszana przez bazę, nie przez kod aplikacji** — polityki dostępu na
 poziomie wierszy w `supabase/migrations/20260820150000_initial_schema.sql`. Zapytanie bez
@@ -105,7 +105,7 @@ mówi wprost: trzy guardraile produktu żyją w SQL-u, poza zasięgiem jakiegoko
 narzędzia w zestawieniu, a graf `.astro` powstał z odczytu importów wyrażeniem
 regularnym, nie z analizy składniowej. Mapa mówi, co od czego zależy — i wyłącznie tam,
 gdzie sięgnęły narzędzia.
-Commit: `c9fc94c`.
+Commit: `9774577`.
 
 **Ranking okazji do refaktoru zweryfikowany `ast-grep`** —
 `context/changes/refactor-opportunities/research.md`. Sześciu kandydatów, każde
@@ -113,16 +113,16 @@ twierdzenie oznaczone jako **evidence** albo **inference**, trzech zakwalifikowa
 audytu, trzech odrzuconych z uzasadnieniem. Odrzucenia są równie istotne: import modułu
 domenowego w `PriorityBadge.astro` wygląda na naruszenie warstw, ale jest importem
 wyłącznie typu — brak sprzężenia w czasie wykonania.
-Commit: `9ea6a04`.
+Commit: `384207b`.
 
 **Dwa wykonane refaktory:**
 
-_Kandydat 1 — rozstrzygnięcie jako jedna operacja atomowa_ (`3085674`). `recordDecision`
+_Kandydat 1 — rozstrzygnięcie jako jedna operacja atomowa_ (`b138e3c`). `recordDecision`
 wykonywało dwa niezależne zapisy — wpis do historii i zmianę stanu pozycji — bez żadnego
 mechanizmu spójności. Naprawione funkcją `record_decision` w bazie, migracja
 `20260821140000_atomic_decision.sql`. Szerzej w sekcji o guardrailach poniżej.
 
-_Kandydat 2 — podział warstwy danych wzdłuż pojęć domenowych_ (`522adac`). Jeden plik
+_Kandydat 2 — podział warstwy danych wzdłuż pojęć domenowych_ (`9e38587`). Jeden plik
 na 335 linii i 14 eksportowanych funkcji rozdzielony na `assets.ts`, `vulnerabilities.ts`,
 `decisions.ts`, `queue.ts` i wspólne `rows.ts`, przy zachowaniu punktu wejścia
 `patchqueue.ts` re-eksportującego części — dziewięć modułów zależnych nie musiało się
@@ -137,14 +137,14 @@ importu pakietu. Przeciek niewidoczny w imporcie jest trudniejszy do wykrycia ni
 dziewiętnaście jawnych. **Plan świadomie nie został wykonany** — `tech-stack.md` przyjmuje
 sprzężenie z jednym dostawcą jako zaakceptowane ryzyko, więc nie ma tu rozjazdu
 intencja-vs-kod, jest dług, którego koszt został wyceniony.
-Commity: `3a30d40`, `958bf07`.
+Commity: `ccf60c3`, `4baf650`.
 
 **Raport architektoniczny** — `RAPORT-ARCHITEKTONICZNY.md`, dowód dla tego bloku. Składa
 cztery artefakty w jedną odpowiedź na pytanie, gdzie mieszka wiedza o produkcie. Wątek
 przewodni, w który wszystkie cztery badania trafiły niezależnie: **reguła dotycząca pozycji
 zostaje zapisana tam, gdzie po raz pierwszy była potrzebna, a nie tam, gdzie pozycja jest
 definiowana.** Trzy potwierdzone wystąpienia, dwa naprawione, jedno otwarte i opisane.
-Commit: `922a9c7`.
+Commit: `1bf66c2`.
 
 **Research wybranej funkcji** — `context/changes/import-flow/research.md`, artefakt L3.
 Ścieżka wczytywania jest jedyną funkcją przechodzącą przez wszystkie warstwy naraz.
@@ -153,17 +153,17 @@ Najmocniejsze ustalenie nie pochodzi z analizy, tylko z danych produkcyjnych: pi
 walidujący wymaga w numerze czterech do siedmiu cyfr, a ten ma trzy. Wszedł formularzem,
 który nie sprawdza kształtu w ogóle. Te same pięć wierszy ujawniło wcześniej brak reguły
 o duplikatach — jedne dane, dwie niezależne luki, obie po tej samej stronie.
-Commit: `b575ef5`.
+Commit: `964c8d4`.
 
 **Destylacja domeny** — `context/domain/01-domain-distillation.md`. Czternaście pojęć
 z dokumentów i kodu, przypisanie subdomen (Core / Supporting / Generic), trzech
 kandydatów na agregaty z niezmiennikami i statusem egzekwowania każdego. Najciekawszy
 wynik: **wszystkie twarde niezmienniki były egzekwowane w bazie, a nie w kodzie
 domenowym** — więc ani analiza statyczna, ani testy jednostkowe ich nie widziały.
-Commit: `8771d46`.
+Commit: `0d5fe35`.
 
 **Agregat: zasób wraz ze swoimi pozycjami** — `src/lib/domain/monitored-asset.ts`,
-`1415f68`. Odpowiedź na kandydata #1 z destylacji. Jeden z jego niezmienników — „zmiana
+`609e16d`. Odpowiedź na kandydata #1 z destylacji. Jeden z jego niezmienników — „zmiana
 ekspozycji przelicza wszystkie otwarte pozycje, a rozstrzygniętych nie" — nie miał
 żadnego strażnika w kodzie; działał wyłącznie dlatego, że priorytet nie jest
 przechowywany. Pierwsza naturalna optymalizacja przy rosnącej kolejce, czyli zapisanie
@@ -207,8 +207,8 @@ zauważył**, oba tej samej klasy — plan deklarował pokrycie, którego nie by
 
 | Przebieg | Ustalenie                                                                                                                                        | Reakcja                                             |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
-| 1        | `translate()` obsługuje zapis **i** aktualizację, kontrakt planu to deklarował, testy jechały wyłącznie wstawianiem                              | test integracyjny na ścieżkę edycji (`651cd39`)     |
-| 2        | Luka na poziomie bazy zamknięta, ale tłumaczenie komunikatu przy edycji nadal nietestowane — test uderzał w bazę z pominięciem warstwy aplikacji | test przeglądowy przez formularz edycji (`2ceda08`) |
+| 1        | `translate()` obsługuje zapis **i** aktualizację, kontrakt planu to deklarował, testy jechały wyłącznie wstawianiem                              | test integracyjny na ścieżkę edycji (`9bc7a85`)     |
+| 2        | Luka na poziomie bazy zamknięta, ale tłumaczenie komunikatu przy edycji nadal nietestowane — test uderzał w bazę z pominięciem warstwy aplikacji | test przeglądowy przez formularz edycji (`024c05e`) |
 
 Drugie ustalenie jest istotniejsze niż pierwsze: agent **zawęził** swój własny zarzut po
 poprawce, zamiast uznać sprawę za zamkniętą albo powtórzyć to samo zdanie. To jest różnica
@@ -217,7 +217,7 @@ między przeglądem, który czyta kod, a takim, który generuje uprzejmy komenta
 Zgłoszenie w poprzedniej wersji mówiło, że ten workflow „leży gotowy, wymaga tylko sekretu".
 **To było nieprawdą i warto wiedzieć, o ile.** Pierwsze prawdziwe uruchomienie ujawniło
 cztery niezależne braki, jeden po drugim: sekret `ANTHROPIC_API_KEY`, uprawnienie
-`id-token: write` w bloku `permissions` (`d9e1a73`), aplikację GitHub „Claude"
+`id-token: write` w bloku `permissions` (`b86a9fd`), aplikację GitHub „Claude"
 zainstalowaną w repozytorium oraz klucz API związany z przestrzenią roboczą, a nie
 z tożsamością. Żaden nie był widoczny wcześniej, bo plik istniał i wyglądał kompletnie.
 
@@ -316,7 +316,7 @@ odróżnia jedno od drugiego i zawodzi z wyraźnym komunikatem, gdy funkcji brak
 po `viewport` i `deviceScaleFactor`, więc je kasowało — obrazki wychodziły w 1280 px zamiast
 zadanych 1440 i bez skalowania. Plik trafił na `main` **bez uruchomienia kontroli typów**,
 więc bramka była czerwona, a nikt tego nie zauważył. Wykryte dopiero przy następnym pełnym
-przebiegu bramek. Naprawa: `fb7a1a2`.
+przebiegu bramek. Naprawa: `d255832`.
 
 **7. Bramka przeglądu świeci na zielono bez przeglądu.** Opisane w bloku Champion powyżej:
 gdy agent nie opublikuje raportu, krok weryfikujący werdykt odczytuje **poprzedni** plik,
@@ -358,7 +358,7 @@ odrzucenia po stronie bazy między dwoma wywołaniami. Test odtwarza więc tę s
 z drugim zapisem celowo naruszającym ograniczenie schematu i pokazuje, że rozbieżność
 zostaje na stałe; test bliźniaczy robi to samo przez funkcję `record_decision` i oczekuje
 wycofania obu zapisów.
-Uzasadnienie: `context/changes/atomic-decisions/change.md`, naprawa: `3085674`.
+Uzasadnienie: `context/changes/atomic-decisions/change.md`, naprawa: `b138e3c`.
 
 ---
 
